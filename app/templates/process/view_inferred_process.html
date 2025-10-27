@@ -1,0 +1,106 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Process: {{ process.name }} - Inferred Workflow{% endblock %}
+
+{% block content %}
+<div class="process-view-container">
+    <div class="header">
+        <h1>{{ process.name }}</h1>
+        <div class="actions">
+            <a href="{{ url_for('process.process_graphs') }}" class="btn">Back to Processes</a>
+            <a href="{{ url_for('ontology.loaded_ontology') }}" class="btn btn-primary">Method Library</a>
+        </div>
+    </div>
+
+    <div class="process-info">
+        <div class="card">
+            <div class="card-header">
+                <h2>Process Information</h2>
+            </div>
+            <div class="card-content">
+                <p><strong>Status:</strong> <span class="badge badge-inferred">Inferred from Ontology</span></p>
+                <p><strong>Description:</strong> {{ process.description }}</p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ process.step_count }}</div>
+                        <div class="stat-label">Method Steps</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if visualization_path %}
+    <div class="visualization">
+        <div class="card">
+            <div class="card-header">
+                <h2>Process Visualization</h2>
+            </div>
+            <div class="card-content">
+                <div class="visualization-container">
+                    <iframe src="{{ url_for('static', filename='visualizations/' + visualization_path) }}"
+                            width="100%" height="600px" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="process-steps">
+        <div class="card">
+            <div class="card-header">
+                <h2>Process Steps</h2>
+            </div>
+            <div class="card-content">
+                {% if process.path_info %}
+                <ol class="steps-list">
+                    {% for step in process.path_info %}
+                    <li>
+                        <strong>{{ step.method_name }}</strong>
+                        <br><small>Input: <code>{{ step.input }}</code> → Output: <code>{{ step.output }}</code></small>
+                    </li>
+                    {% endfor %}
+                </ol>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<style>
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    
+    .badge-inferred {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .steps-list {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    .steps-list li {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    code {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}

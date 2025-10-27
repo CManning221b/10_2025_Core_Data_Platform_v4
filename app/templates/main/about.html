@@ -1,0 +1,81 @@
+{% extends 'base/base.html' %}
+
+{% block title %}About - Graph Analysis Toolkit{% endblock %}
+
+{% block content %}
+
+<div class="about-container"> <h1>About the Graph Analysis Toolkit</h1>
+
+<div class="about-section">
+    <h2>Purpose</h2>
+    <p>This toolkit is developed as part of an academic research initiative focused on knowledge management in safety-critical domains. It provides a structured approach to modeling, interpreting, and tracing data by leveraging graph-based representations and ontological reasoning.</p>
+</div>
+
+<div class="about-section">
+    <h2>Motivation</h2>
+    <p>Modern data-driven techniques often rely on opaque statistical models and large-scale datasets. These methods can be difficult to interpret and trace — especially problematic in domains that demand transparency, accountability, and safety.</p>
+    <ul>
+        <li>Traditional data pipelines lack traceability and semantic clarity.</li>
+        <li>Neural network-based systems offer limited insight into how conclusions are derived.</li>
+        <li>There is a scarcity of tools to audit or interrogate the full data lifecycle.</li>
+    </ul>
+    <p>To address these challenges, this system brings data into a graph-based knowledge layer, supporting structured reasoning and traceable insight generation.</p>
+</div>
+
+<div class="about-section">
+    <h2>Approach</h2>
+    <p>All input data is translated into a structured graph representation. An ontology governs the relationships and semantics within the graph, enabling:</p>
+    <ul>
+        <li>Reusable reasoning rules for inference</li>
+        <li>Semantic consistency across datasets</li>
+        <li>Traceable transformations from raw input to insight</li>
+        <li>Rich, interpretable visualizations for exploration</li>
+    </ul>
+</div>
+
+<div class="about-section">
+    <h2>System Components</h2>
+    <div class="features-grid">
+        <div class="feature">
+            <h3><i class="fas fa-upload"></i> Flexible Data Ingestion</h3>
+            <p>Import data from CSV, JSON, or file structures and convert it into semantically coherent graph formats.</p>
+        </div>
+        <div class="feature">
+            <h3><i class="fas fa-project-diagram"></i> Ontology-Driven Representation</h3>
+            <p>Define domain-specific relationships and constraints using a customizable ontology.</p>
+        </div>
+        <div class="feature">
+            <h3><i class="fas fa-search"></i> Visual & Structural Analysis</h3>
+            <p>Examine graph topologies, discover patterns, and trace the provenance of inferences.</p>
+        </div>
+        <div class="feature">
+            <h3><i class="fas fa-lightbulb"></i> Inference & Reasoning</h3>
+            <p>Apply declarative rules to derive new knowledge and highlight implicit relationships.</p>
+        </div>
+    </div>
+</div>
+
+<div class="about-section">
+    <h2>Technology Stack</h2>
+    <p>The toolkit is implemented using a modular research-grade technology stack:</p>
+    <ul class="tech-list">
+        <li><strong>Backend:</strong> Python (Flask) with custom graph processing logic</li>
+        <li><strong>Reasoning:</strong> Ontology-based rule engine and structural inference methods</li>
+        <li><strong>Visualization:</strong> PyVis and D3.js for interactive, interpretable graph views</li>
+        <li><strong>Interface:</strong> Standards-compliant frontend (HTML5/CSS3/JS)</li>
+    </ul>
+</div>
+
+<div class="about-section">
+    <h2>Next Steps</h2>
+    <p>If you're ready to explore structured knowledge modeling, begin by importing your dataset:</p>
+    <div class="cta-buttons">
+        <a href="{{ url_for('upload.upload_page') }}" class="btn btn-primary">Import Data</a>
+        <a href="{{ url_for('main.about') }}" class="btn">View Documentation</a>
+    </div>
+</div>
+</div> {% endblock %}
+{% block additional_css %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

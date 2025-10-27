@@ -1,0 +1,64 @@
+/* Add this to your instance_graph.css */
+
+.graph-preview-container iframe {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: #fff;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    text-align: center;
+}
+
+.error-message .btn-small {
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+/* Add to app/static/css/instance_graph.css */
+
+/* Ontology tab styling */
+.ontology-content {
+    margin-top: 1rem;
+}
+
+.ontology-actions {
+    margin-bottom: 1rem;
+    text-align: right;
+}
+
+.ontology-preview-container {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    min-height: 600px;
+    position: relative;
+}
+
+.loading-ontology {
+    text-align: center;
+    color: #666;
+    padding: 2rem;
+}
+
+.ontology-iframe-container {
+    width: 100%;
+    height: 600px;
+}
+
+.ontology-error {
+    text-align: center;
+    padding: 2rem;
+    color: #721c24;
+}
+
+#generate-ontology-btn {
+    margin-top: 1rem;
+}

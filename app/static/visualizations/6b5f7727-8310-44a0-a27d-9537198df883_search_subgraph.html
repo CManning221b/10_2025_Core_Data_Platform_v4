@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    
+            <style>
+            #mynetworkid {
+                width: 100% !important;
+                height: 600px !important;
+                border: 1px solid #ddd;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+            }
+            .vis-network {
+                width: 100% !important;
+                height: 600px !important;
+            }
+            </style>
+            </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "39", "label": "1890", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 39\nType: component\nvalue: 1890"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "38", "label": "HNB R3 1890 20121...", "shape": "dot", "size": 20, "title": "ID: 38\nType: filename\nvalue: HNB R3 1890 20121005 C E S F\nhierarchy_level: 1"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "1", "label": "HNB R3 0878 20080...", "shape": "dot", "size": 20, "title": "ID: 1\nType: filename\nvalue: HNB R3 0878 20080204 D E Z F\nhierarchy_level: 1"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "28", "label": "HNB R3 1464 20121...", "shape": "dot", "size": 20, "title": "ID: 28\nType: filename\nvalue: HNB R3 1464 20121008 C E N F\nhierarchy_level: 1"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "4", "label": "0878", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 4\nType: component\nvalue: 0878"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "2", "label": "HNB", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 2\nType: component\nvalue: HNB"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "19", "label": "HNB R3 1288 20100...", "shape": "dot", "size": 20, "title": "ID: 19\nType: filename\nvalue: HNB R3 1288 20100709 D E Z O\nhierarchy_level: 1"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#c485d2", "font": {"color": "black"}, "id": "52", "label": "Channel 1270", "shape": "dot", "size": 20, "title": "ID: 52\nType: channel\nvalue: Channel 1270\nhierarchy: reactor\nchannel_id: 1270\nreactor_type: AGR\noriginal_text: 1270\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "23", "label": "HNB R3 1288 20130...", "shape": "dot", "size": 20, "title": "ID: 23\nType: filename\nvalue: HNB R3 1288 20130420 C E N O\nhierarchy_level: 1"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "47", "label": "HNB R3 2274 20101...", "shape": "dot", "size": 20, "title": "ID: 47\nType: filename\nvalue: HNB R3 2274 20101105 C E Z O\nhierarchy_level: 1"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#c485d2", "font": {"color": "black"}, "id": "51", "label": "Channel 0878", "shape": "dot", "size": 20, "title": "ID: 51\nType: channel\nvalue: Channel 0878\nhierarchy: reactor\nchannel_id: 0878\nreactor_type: AGR\noriginal_text: 0878\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843438"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "13", "label": "1270", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 13\nType: component\nvalue: 1270"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#d764b3", "font": {"color": "black"}, "id": "50", "label": "ChannelDetectionM...", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 50\nType: ChannelDetectionMethod\nvalue: ChannelDetectionMethod execution (AGR reactor)\nhierarchy: analysis\nmethod_type: ChannelDetectionMethod\nreactor_type: AGR\nexecution_time: 2025-08-18T08:12:35.843438\nmethod_id: ChannelDetectionMethod\nmethod_name: Ontology-Driven Channel ID Detection"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "29", "label": "1464", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 29\nType: component\nvalue: 1464"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "26", "label": "HNB R3 1288 20130...", "shape": "dot", "size": 20, "title": "ID: 26\nType: filename\nvalue: HNB R3 1288 20130420 D E Z O\nhierarchy_level: 1"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "20", "label": "1288", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 20\nType: component\nvalue: 1288"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "48", "label": "2274", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 48\nType: component\nvalue: 2274"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "32", "label": "HNB R3 1464 20121...", "shape": "dot", "size": 20, "title": "ID: 32\nType: filename\nvalue: HNB R3 1464 20121008 D E Z F\nhierarchy_level: 1"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#6464d7", "font": {"color": "black"}, "id": "12", "label": "HNB R3 1270 20130...", "shape": "dot", "size": 20, "title": "ID: 12\nType: filename\nvalue: HNB R3 1270 20130809 C E N O\nhierarchy_level: 1"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#999999", "from": "32", "label": "has_component", "title": "Edge: 32_29\nType: has_component\nFrom: 32\nTo: 29\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "29", "width": 2}, {"arrows": "to", "color": "#999999", "from": "38", "label": "has_component", "title": "Edge: 38_2\nType: has_component\nFrom: 38\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "28", "label": "has_component", "title": "Edge: 28_2\nType: has_component\nFrom: 28\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "26", "label": "has_component", "title": "Edge: 26_2\nType: has_component\nFrom: 26\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "12", "label": "has_component", "title": "Edge: 12_2\nType: has_component\nFrom: 12\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "1", "label": "has_component", "title": "Edge: 1_4\nType: has_component\nFrom: 1\nTo: 4\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "4", "width": 2}, {"arrows": "to", "color": "#999999", "from": "19", "label": "has_component", "title": "Edge: 19_20\nType: has_component\nFrom: 19\nTo: 20\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "20", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "produces", "title": "Edge: 50_52\nType: produces\nFrom: 50\nTo: 52\nedge_type: produces\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: channel\nprovenance_type: generated_by\ncreated: 2025-08-18T08:12:35.843941", "to": "52", "width": 2}, {"arrows": "to", "color": "#999999", "from": "19", "label": "has_component", "title": "Edge: 19_2\nType: has_component\nFrom: 19\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "produces", "title": "Edge: 50_51\nType: produces\nFrom: 50\nTo: 51\nedge_type: produces\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: channel\nprovenance_type: generated_by\ncreated: 2025-08-18T08:12:35.843438", "to": "51", "width": 2}, {"arrows": "to", "color": "#999999", "from": "26", "label": "has_component", "title": "Edge: 26_20\nType: has_component\nFrom: 26\nTo: 20\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "20", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "uses", "title": "Edge: 50_13\nType: uses\nFrom: 50\nTo: 13\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T08:12:35.843941", "to": "13", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "uses", "title": "Edge: 50_20\nType: uses\nFrom: 50\nTo: 20\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T08:12:35.843941", "to": "20", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "uses", "title": "Edge: 50_4\nType: uses\nFrom: 50\nTo: 4\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T08:12:35.843438", "to": "4", "width": 2}, {"arrows": "to", "color": "#999999", "from": "23", "label": "has_component", "title": "Edge: 23_20\nType: has_component\nFrom: 23\nTo: 20\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "20", "width": 2}, {"arrows": "to", "color": "#999999", "from": "47", "label": "has_component", "title": "Edge: 47_48\nType: has_component\nFrom: 47\nTo: 48\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "48", "width": 2}, {"arrows": "to", "color": "#ff4444", "from": "12", "label": "has_channel", "title": "SEARCH MATCH\nEdge: 12_52\nType: has_channel\nFrom: 12\nTo: 52\nedge_type: has_channel\ndirection: out\nsource_type: filename\ntarget_type: channel\nprovenance_type: contains_channel_reference\ncreated: 2025-08-18T08:12:35.843941", "to": "52", "width": 4}, {"arrows": "to", "color": "#ff4444", "from": "1", "label": "has_channel", "title": "SEARCH MATCH\nEdge: 1_51\nType: has_channel\nFrom: 1\nTo: 51\nedge_type: has_channel\ndirection: out\nsource_type: filename\ntarget_type: channel\nprovenance_type: contains_channel_reference\ncreated: 2025-08-18T08:12:35.843941", "to": "51", "width": 4}, {"arrows": "to", "color": "#999999", "from": "1", "label": "has_component", "title": "Edge: 1_2\nType: has_component\nFrom: 1\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "uses", "title": "Edge: 50_39\nType: uses\nFrom: 50\nTo: 39\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T08:12:35.843941", "to": "39", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "uses", "title": "Edge: 50_29\nType: uses\nFrom: 50\nTo: 29\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T08:12:35.843941", "to": "29", "width": 2}, {"arrows": "to", "color": "#999999", "from": "50", "label": "uses", "title": "Edge: 50_48\nType: uses\nFrom: 50\nTo: 48\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T08:12:35.843941", "to": "48", "width": 2}, {"arrows": "to", "color": "#999999", "from": "47", "label": "has_component", "title": "Edge: 47_2\nType: has_component\nFrom: 47\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "28", "label": "has_component", "title": "Edge: 28_29\nType: has_component\nFrom: 28\nTo: 29\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "29", "width": 2}, {"arrows": "to", "color": "#999999", "from": "32", "label": "has_component", "title": "Edge: 32_2\nType: has_component\nFrom: 32\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "23", "label": "has_component", "title": "Edge: 23_2\nType: has_component\nFrom: 23\nTo: 2\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "2", "width": 2}, {"arrows": "to", "color": "#999999", "from": "12", "label": "has_component", "title": "Edge: 12_13\nType: has_component\nFrom: 12\nTo: 13\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "13", "width": 2}, {"arrows": "to", "color": "#999999", "from": "38", "label": "has_component", "title": "Edge: 38_39\nType: has_component\nFrom: 38\nTo: 39\nedge_type: has_component\ndirection: out\nsource_type: filename\ntarget_type: component", "to": "39", "width": 2}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 150}, "barnesHut": {"gravitationalConstant": -8000, "centralGravity": 0.3, "springLength": 95, "springConstant": 0.04, "damping": 0.09}}, "edges": {"arrows": {"to": {"enabled": true, "scaleFactor": 0.8}}, "smooth": {"enabled": true, "type": "continuous"}, "font": {"size": 10}}, "nodes": {"font": {"size": 12}, "borderWidth": 2, "shadow": true}, "layout": {"improvedLayout": true}, "interaction": {"dragNodes": true, "dragView": true, "zoomView": true}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

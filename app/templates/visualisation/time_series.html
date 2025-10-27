@@ -1,0 +1,751 @@
+<!-- app/templates/visualisation/time_series.html -->
+{% extends "base/base.html" %}
+
+{% block title %}Timeline Visualization{% endblock %}
+
+{% block content %}
+<div class="visualization-container">
+    <h2>Timeline Analysis - Graph: {{ graph_id }}</h2>
+
+    {% if timeline_data.has_data %}
+        <div class="timeline-stats">
+            <p>Found {{ timeline_data.temporal_data.measurements|length }} measurements,
+               {{ timeline_data.temporal_data.events|length }} events, and
+               {{ timeline_data.temporal_data.objects|length }} objects</p>
+        </div>
+
+        <!-- Interactive Control Panel -->
+        <div class="control-panel">
+            <h4>Visualization Controls</h4>
+            <div class="controls-grid">
+                <!-- Object Sorting Controls -->
+                <div class="control-section">
+                    <h5>Object Sorting</h5>
+                    <div class="control-group">
+                        <label for="sortMethod">Sort By:</label>
+                        <select id="sortMethod" class="form-control">
+                            <option value="auto">Auto-detect Best</option>
+                            <option value="display_name">Display Name</option>
+                            <option value="measurement_value">Measurement Value</option>
+                            <option value="property_value">Property Value</option>
+                            <option value="parent_relationship">Parent Type</option>
+                            <option value="child_count">Number of Children</option>
+                        </select>
+                    </div>
+                    <div class="control-group" id="propertySelect" style="display: none;">
+                        <label for="sortProperty">Property:</label>
+                        <select id="sortProperty" class="form-control">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" id="reverseSort"> Reverse Order
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Color Coding Controls -->
+                <div class="control-section">
+                    <h5>Color Coding</h5>
+                    <div class="control-group">
+                        <label for="colorMethod">Color By:</label>
+                        <select id="colorMethod" class="form-control">
+                            <option value="auto">Auto-detect Best</option>
+                            <option value="node_type">Node Type</option>
+                            <option value="property_value">Property Value</option>
+                            <option value="parent_type">Parent Type</option>
+                            <option value="measurement_range">Measurement Range</option>
+                        </select>
+                    </div>
+                    <div class="control-group" id="colorPropertySelect" style="display: none;">
+                        <label for="colorProperty">Property:</label>
+                        <select id="colorProperty" class="form-control">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Visualization Mode Controls -->
+                <div class="control-section">
+                    <h5>Visualization Mode</h5>
+                    <div class="control-group">
+                        <label for="visualizationMode">Display Mode:</label>
+                        <select id="visualizationMode" class="form-control">
+                            <option value="timeline">Timeline View</option>
+                            <option value="histogram">Frequency Histogram</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="categoryFilter">Show Category:</label>
+                        <select id="categoryFilter" class="form-control">
+                            <option value="all">All Categories</option>
+                            <option value="measurements">Measurements Only</option>
+                            <option value="events" selected>Events Only</option>
+                            <option value="objects">Objects Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filtering Controls -->
+                <div class="control-section">
+                    <h5>Filtering</h5>
+                    <div class="control-group">
+                        <label for="nodeTypeFilter">Node Types:</label>
+                        <select id="nodeTypeFilter" class="form-control" multiple size="4">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <small class="help-text">Hold Ctrl/Cmd for multiple selection</small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="control-section">
+                    <h5>Actions</h5>
+                    <button id="updateVisualization" class="btn btn-primary">
+                        Update Visualization
+                    </button>
+                    <button id="resetToDefaults" class="btn btn-secondary">
+                        Reset to Defaults
+                    </button>
+                    <button id="exportData" class="btn btn-info">
+                        Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Updating visualization...</p>
+        </div>
+
+        <!-- Timeline Visualization -->
+        <div class="timeline-visualization">
+            {{ timeline_data.plot_html|safe }}
+        </div>
+
+        <!-- Object Details Modal -->
+        <div id="objectDetailsModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Object Details</h5>
+                    <span class="modal-close">&times;</span>
+                </div>
+                <div class="modal-body" id="objectDetailsContent">
+                    <!-- Populated dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="closeModal">Close</button>
+                    <button class="btn btn-primary" id="filterBySimilar">Filter by Similar</button>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="no-data-message">
+            <p><strong>No temporal data available for visualization.</strong></p>
+            {% if timeline_data.error %}
+                <p class="error-message">Error: {{ timeline_data.error }}</p>
+            {% endif %}
+
+            <!-- Debug information -->
+            {% if timeline_data.debug_info %}
+                <div class="debug-info">
+                    <h4>Graph Analysis:</h4>
+                    <p><strong>Node types found:</strong></p>
+                    <ul>
+                    {% for node_type, count in timeline_data.debug_info.node_types.items() %}
+                        <li>{{ node_type }}: {{ count }}</li>
+                    {% endfor %}
+                    </ul>
+
+                    {% if timeline_data.debug_info.temporal_properties %}
+                        <p><strong>Temporal properties found:</strong></p>
+                        <ul>
+                        {% for prop in timeline_data.debug_info.temporal_properties %}
+                            <li>{{ prop.node_id }} ({{ prop.node_type }}) - {{ prop.property }}: {{ prop.value }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p><em>No temporal properties found in any nodes.</em></p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="navigation-links">
+        <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn btn-secondary">Back to Graph</a>
+        <a href="{{ url_for('instance.list_graphs') }}" class="btn btn-secondary">All Graphs</a>
+    </div>
+</div>
+
+<style>
+.visualization-container {
+    padding: 20px;
+}
+
+.timeline-stats {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.control-panel {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.control-panel h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.control-section {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.control-section h5 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #6c757d;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 5px;
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.help-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+    display: block;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 5px 5px 5px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #117a8b;
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 20px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.timeline-visualization {
+    width: 100%;
+    min-height: 800px;
+    margin: 20px 0;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+    background: white;
+}
+
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 700px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+    color: #495057;
+}
+
+.modal-close {
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: #000;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+    text-align: right;
+}
+
+.no-data-message {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.debug-info {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+
+.debug-info ul {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.error-message {
+    color: #721c24;
+    background: #f8d7da;
+    padding: 10px;
+    border-radius: 3px;
+    margin: 10px 0;
+}
+
+.navigation-links {
+    margin-top: 30px;
+}
+
+.navigation-links .btn {
+    margin-right: 10px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+</style>
+
+<script>
+// Initialize the visualization
+let currentGraphId = '{{ graph_id }}';
+let timelineData = {{ timeline_data | tojson }};
+let availableOptions = {};
+
+// Load available options when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadAvailableOptions();
+    setupEventListeners();
+    setupClickHandlers();
+});
+
+// Event listeners
+function setupEventListeners() {
+    document.getElementById('sortMethod').addEventListener('change', handleSortMethodChange);
+    document.getElementById('colorMethod').addEventListener('change', handleColorMethodChange);
+    document.getElementById('updateVisualization').addEventListener('click', updateVisualization);
+    document.getElementById('resetToDefaults').addEventListener('click', resetToDefaults);
+    document.getElementById('exportData').addEventListener('click', exportData);
+
+    // Modal event listeners
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.querySelector('.modal-close').addEventListener('click', closeModal);
+    document.getElementById('filterBySimilar').addEventListener('click', filterBySimilar);
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('objectDetailsModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+async function loadAvailableOptions() {
+    try {
+        const response = await fetch(`/visualisation/timeline/${currentGraphId}/options`);
+        availableOptions = await response.json();
+
+        // Populate dropdowns
+        populatePropertyDropdowns();
+        populateNodeTypeFilter();
+    } catch (error) {
+        console.error('Error loading options:', error);
+    }
+}
+
+function populatePropertyDropdowns() {
+    const sortProperty = document.getElementById('sortProperty');
+    const colorProperty = document.getElementById('colorProperty');
+
+    // Clear existing options
+    sortProperty.innerHTML = '';
+    colorProperty.innerHTML = '';
+
+    // Add property options
+    if (availableOptions.sortable_properties) {
+        availableOptions.sortable_properties.forEach(prop => {
+            const option1 = new Option(prop.display_name, prop.property_name);
+            const option2 = new Option(prop.display_name, prop.property_name);
+            sortProperty.appendChild(option1);
+            colorProperty.appendChild(option2);
+        });
+    }
+}
+
+function populateNodeTypeFilter() {
+    const nodeTypeFilter = document.getElementById('nodeTypeFilter');
+    nodeTypeFilter.innerHTML = '';
+
+    if (availableOptions.node_types) {
+        availableOptions.node_types.forEach(nodeType => {
+            const option = new Option(nodeType, nodeType);
+            option.selected = true; // All selected by default
+            nodeTypeFilter.appendChild(option);
+        });
+    }
+}
+
+function handleSortMethodChange() {
+    const method = document.getElementById('sortMethod').value;
+    const propertySelect = document.getElementById('propertySelect');
+    propertySelect.style.display = method === 'property_value' ? 'block' : 'none';
+}
+
+function handleColorMethodChange() {
+    const method = document.getElementById('colorMethod').value;
+    const propertySelect = document.getElementById('colorPropertySelect');
+    propertySelect.style.display = method === 'property_value' ? 'block' : 'none';
+}
+
+async function updateVisualization() {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    loadingIndicator.style.display = 'block';
+
+    try {
+        // Collect current settings
+        const sortCriteria = {
+            method: document.getElementById('sortMethod').value,
+            property: document.getElementById('sortProperty').value || '',
+            reverse: document.getElementById('reverseSort').checked
+        };
+
+        const colorStrategy = {
+            method: document.getElementById('colorMethod').value,
+            property: document.getElementById('colorProperty').value || ''
+        };
+
+        const nodeTypeFilter = document.getElementById('nodeTypeFilter');
+        let selectedNodeTypes = [];
+
+        if (nodeTypeFilter.options.length > 0) {
+            selectedNodeTypes = Array.from(nodeTypeFilter.selectedOptions)
+                .map(option => option.value);
+            if (selectedNodeTypes.length === 0) {
+                selectedNodeTypes = Array.from(nodeTypeFilter.options)
+                    .map(option => option.value);
+            }
+        }
+
+        const filterOptions = {
+            node_types: selectedNodeTypes
+        };
+
+        const visualizationMode = document.getElementById('visualizationMode').value;
+        const categoryFilter = document.getElementById('categoryFilter').value;
+
+        console.log('Sending update request with:', {
+            sort_criteria: sortCriteria,
+            color_strategy: colorStrategy,
+            filter_options: filterOptions,
+            visualization_mode: visualizationMode,
+            category_filter: categoryFilter
+        });
+
+        // Make API call
+        const response = await fetch(`/visualisation/timeline/${currentGraphId}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sort_criteria: sortCriteria,
+                color_strategy: colorStrategy,
+                filter_options: filterOptions,
+                visualization_mode: visualizationMode,
+                category_filter: categoryFilter
+            })
+        });
+
+        const newTimelineData = await response.json();
+        console.log('Received response:', newTimelineData);
+
+        if (!newTimelineData.plot_html) {
+            alert('Error: ' + (newTimelineData.error || 'Unknown error'));
+            return;
+        }
+
+        // Update plot - FIXED VERSION
+        const vizContainer = document.querySelector('.timeline-visualization');
+        vizContainer.innerHTML = newTimelineData.plot_html;
+
+        // Execute any scripts that were inserted
+        const scripts = vizContainer.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            newScript.textContent = oldScript.textContent;
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+
+        setupClickHandlers();
+
+        // Update stats
+        const statsElement = document.querySelector('.timeline-stats p');
+        if (statsElement && newTimelineData.temporal_data) {
+            statsElement.textContent = `Found ${newTimelineData.temporal_data.measurements.length} measurements, ${newTimelineData.temporal_data.events.length} events, and ${newTimelineData.temporal_data.objects.length} objects`;
+        }
+
+    } catch (error) {
+        console.error('Error updating visualization:', error);
+        alert('Error updating visualization. Please try again.');
+    } finally {
+        loadingIndicator.style.display = 'none';
+    }
+}
+
+function resetToDefaults() {
+    document.getElementById('sortMethod').value = 'auto';
+    document.getElementById('colorMethod').value = 'auto';
+    document.getElementById('reverseSort').checked = false;
+    document.getElementById('visualizationMode').value = 'timeline';
+    document.getElementById('categoryFilter').value = 'events';  // Default to events only
+
+    // Select ALL node types
+    const nodeTypeFilter = document.getElementById('nodeTypeFilter');
+    for (let option of nodeTypeFilter.options) {
+        option.selected = true;
+    }
+
+    // Hide property selects
+    document.getElementById('propertySelect').style.display = 'none';
+    document.getElementById('colorPropertySelect').style.display = 'none';
+
+    updateVisualization();
+}
+
+function exportData() {
+    // Create downloadable JSON of current timeline data
+    const dataStr = JSON.stringify(timelineData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `timeline_data_${currentGraphId}.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+function setupClickHandlers() {
+    const plotDiv = document.querySelector('[id="temporal-analysis-plot"]');
+    if (plotDiv) {
+        // Debug: Log what's in the plot
+        if (plotDiv.data) {
+            console.log('Plot has data:', plotDiv.data);
+            console.log('Number of traces:', plotDiv.data.length);
+            plotDiv.data.forEach((trace, idx) => {
+                console.log(`Trace ${idx}:`, {
+                    name: trace.name,
+                    type: trace.type,
+                    x_length: trace.x ? trace.x.length : 0,
+                    y_length: trace.y ? trace.y.length : 0,
+                    x_sample: trace.x ? trace.x.slice(0, 3) : [],
+                    y_sample: trace.y ? trace.y.slice(0, 3) : []
+                });
+            });
+        } else {
+            console.log('Plot div exists but has no data property');
+        }
+
+        plotDiv.addEventListener('plotly_click', function(data) {
+            console.log('Plot clicked:', data);
+        });
+    } else {
+        console.log('Plot div not found!');
+    }
+}
+
+function showObjectDetails(objectData) {
+    const modal = document.getElementById('objectDetailsModal');
+    const content = document.getElementById('objectDetailsContent');
+
+    // Build detailed HTML for the object
+    let html = `
+        <h6>Basic Information</h6>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+            <tr><td style="padding: 5px; border: 1px solid #dee2e6;"><strong>ID:</strong></td><td style="padding: 5px; border: 1px solid #dee2e6;">${objectData.node_id}</td></tr>
+            <tr><td style="padding: 5px; border: 1px solid #dee2e6;"><strong>Type:</strong></td><td style="padding: 5px; border: 1px solid #dee2e6;">${objectData.node_type}</td></tr>
+        </table>
+
+        <h6>Properties</h6>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+    `;
+
+    for (const [key, value] of Object.entries(objectData.properties || {})) {
+        html += `<tr><td style="padding: 5px; border: 1px solid #dee2e6;"><strong>${key}:</strong></td><td style="padding: 5px; border: 1px solid #dee2e6;">${value}</td></tr>`;
+    }
+
+    html += `</table>`;
+
+    if (objectData.parents && objectData.parents.length > 0) {
+        html += `<h6>Parent Relationships</h6><ul style="margin-bottom: 15px;">`;
+        objectData.parents.forEach(parent => {
+            html += `<li style="margin-bottom: 5px;">${parent.name} (${parent.type}) via ${parent.edge_type}</li>`;
+        });
+        html += `</ul>`;
+    }
+
+    if (objectData.children && objectData.children.length > 0) {
+        html += `<h6>Child Relationships</h6><ul style="margin-bottom: 15px;">`;
+        objectData.children.forEach(child => {
+            html += `<li style="margin-bottom: 5px;">${child.name} (${child.type}) via ${child.edge_type}</li>`;
+        });
+        html += `</ul>`;
+    }
+
+    content.innerHTML = html;
+    modal.style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('objectDetailsModal').style.display = 'none';
+}
+
+function filterBySimilar() {
+    // TODO: Implement filtering by similar objects
+    alert('Filter by similar functionality coming soon!');
+    closeModal();
+}
+</script>
+{% endblock %}

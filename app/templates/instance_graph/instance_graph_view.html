@@ -1,0 +1,95 @@
+<!-- app/templates/instance_graph/instance_graph_view.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}Graph View - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="graph-view-container">
+    
+    <div class="header">
+        <h1>Graph View</h1>
+        <div class="actions">
+            <a href="{{ url_for('ontology.extract_ontology', graph_id=graph_id) }}" class="btn btn-primary">View Ontology</a>
+            <a href="{{ url_for('ontology.compare_ontologies', graph_id=graph_id) }}" class="btn btn-primary">Compare with OWL</a>
+            <a href="{{ url_for('instance.graph_details', graph_id=graph_id) }}" class="btn">View Details</a>
+            <a href="{{ url_for('instance.list_graphs') }}" class="btn">All Graphs</a>
+        </div>
+    </div>
+    <div class="graph-metadata">
+        <p><strong>Graph ID:</strong> {{ graph_id }}</p>
+        <p><strong>Nodes:</strong> {{ graph_data.nodes|length }}</p>
+        <p><strong>Edges:</strong> {{ graph_data.edges|length }}</p>
+    </div>
+
+    <div class="visualization-tabs">
+        <div class="tab-header">
+            <div class="tab-btn active" data-tab="preview">Graph Preview</div>
+            <div class="tab-btn" data-tab="raw">Raw Data</div>
+        </div>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="preview-tab">
+                <h2>Graph Preview</h2>
+                <div id="graph-container" class="graph-preview-container">
+                    {% if vis_path %}
+                    <iframe src="{{ url_for('static', filename=vis_path) }}" width="100%" height="600px"
+                            frameborder="0" allowfullscreen></iframe>
+                    {% else %}
+                    <p class="error-message">
+                        Unable to generate visualization for this graph. The graph may be too large or contain incompatible data.
+                        <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn btn-small">Try Again</a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="tab-pane" id="raw-tab">
+                <h2>Raw Graph Data</h2>
+                <div class="data-section">
+                    <h3>Nodes</h3>
+                    <div class="raw-data">
+                        <pre>{{ graph_data.nodes|tojson(indent=2) }}</pre>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3>Edges</h3>
+                    <div class="raw-data">
+                        <pre>{{ graph_data.edges|tojson(indent=2) }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instance_graph.css') }}">
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Show corresponding tab
+                const tabId = this.getAttribute('data-tab') + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+<script src="{{ url_for('static', filename='js/instance/instance_viewer.js') }}"></script>
+{% endblock %}

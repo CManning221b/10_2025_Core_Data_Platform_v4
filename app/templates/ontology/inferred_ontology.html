@@ -1,0 +1,279 @@
+<!-- app/templates/ontology/inferred_ontology.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}Ontology View - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="ontology-view-container">
+    <div class="header">
+        <h1>Ontology View</h1>
+        <div class="actions">
+            <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn">View Graph</a>
+            <a href="{{ url_for('ontology.compare_ontologies', graph_id=graph_id) }}" class="btn btn-primary">Compare with OWL</a>
+            <a href="{{ url_for('instance.list_graphs') }}" class="btn">All Graphs</a>
+            <form action="{{ url_for('ontology.export_owl', graph_id=graph_id) }}" method="post" class="d-inline">
+                <input type="hidden" name="format" value="ttl">
+                <input type="hidden" name="include_annotations" value="true">
+                <input type="hidden" name="include_cardinality" value="true">
+                <input type="hidden" name="include_characteristics" value="true">
+                <button type="submit" class="btn btn-success">Export as OWL (TTL)</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="ontology-summary">
+        <h2>Ontology Summary</h2>
+        {% if ontology_data %}
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-value">
+                    {% if ontology_data.ontology_summary is defined %}
+                        {{ ontology_data.ontology_summary.node_types }}
+                    {% elif ontology_data.node_types is defined %}
+                        {{ ontology_data.node_types|length }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-label">Node Types</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {% if ontology_data.ontology_summary is defined %}
+                        {{ ontology_data.ontology_summary.edge_types }}
+                    {% elif ontology_data.edge_types is defined %}
+                        {{ ontology_data.edge_types|length }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-label">Edge Types</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    {% if ontology_data.ontology_summary is defined %}
+                        {{ ontology_data.ontology_summary.relationship_patterns }}
+                    {% elif ontology_data.relationship_patterns is defined %}
+                        {{ ontology_data.relationship_patterns.common_patterns|length if ontology_data.relationship_patterns.common_patterns else 0 }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-label">Relationship Patterns</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-data-message">
+            <p>No ontology summary data available.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="visualization-tabs">
+        <div class="tab-header">
+            <div class="tab-btn active" data-tab="visualization">Ontology Visualization</div>
+            <div class="tab-btn" data-tab="node-types">Node Types</div>
+            <div class="tab-btn" data-tab="edge-types">Edge Types</div>
+            <div class="tab-btn" data-tab="relationships">Relationships</div>
+        </div>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="visualization-tab">
+                <h2>Ontology Visualization</h2>
+                {% if ontology_data and ontology_data.visualization_path %}
+                <div class="visualization-container">
+                    <iframe src="{{ url_for('static', filename='visualizations/' + ontology_data.visualization_path) }}"
+                            width="100%" height="600px" frameborder="0" allowfullscreen></iframe>
+                </div>
+                {% else %}
+                <div class="error-message">
+                    Visualization not available for this ontology.
+                    <form action="{{ url_for('ontology.extract_ontology', graph_id=graph_id) }}" method="post">
+                        <button type="submit" class="btn btn-small">Generate Visualization</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="tab-pane" id="node-types-tab">
+                <h2>Node Types</h2>
+                {% if ontology_data and ontology_data.node_types and ontology_data.node_types is mapping %}
+                <div class="type-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Node Type</th>
+                                <th>Count</th>
+                                <th>Coverage</th>
+                                <th>Properties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type_name, type_info in ontology_data.node_types.items() %}
+                            <tr>
+                                <td>{{ type_name }}</td>
+                                <td>
+                                    {% if type_info is mapping and type_info.count is defined %}
+                                        {{ type_info.count }}
+                                    {% elif type_info is number %}
+                                        {{ type_info }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if type_info is mapping and type_info.coverage is defined %}
+                                        {{ "%.2f"|format(type_info.coverage * 100) }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if type_info is mapping and type_info.properties is defined and type_info.properties is sequence %}
+                                        {{ type_info.properties|join(', ') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No detailed node type information available for this ontology.</p>
+                    {% if ontology_data %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="tab-pane" id="edge-types-tab">
+                <h2>Edge Types</h2>
+                {% if ontology_data and ontology_data.edge_types and ontology_data.edge_types is mapping %}
+                <div class="type-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Edge Type</th>
+                                <th>Count</th>
+                                <th>Coverage</th>
+                                <th>Properties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type_name, type_info in ontology_data.edge_types.items() %}
+                            <tr>
+                                <td>{{ type_name }}</td>
+                                <td>
+                                    {% if type_info is mapping and type_info.count is defined %}
+                                        {{ type_info.count }}
+                                    {% elif type_info is number %}
+                                        {{ type_info }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if type_info is mapping and type_info.coverage is defined %}
+                                        {{ "%.2f"|format(type_info.coverage * 100) }}%
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if type_info is mapping and type_info.properties is defined and type_info.properties is sequence %}
+                                        {{ type_info.properties|join(', ') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No detailed edge type information available for this ontology.</p>
+                    {% if ontology_data %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="tab-pane" id="relationships-tab">
+                <h2>Relationship Patterns</h2>
+                {% if ontology_data and ontology_data.relationship_patterns and ontology_data.relationship_patterns.common_patterns %}
+                <div class="relationship-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Source Type</th>
+                                <th>Edge Type</th>
+                                <th>Target Type</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pattern in ontology_data.relationship_patterns.common_patterns %}
+                            <tr>
+                                <td>{{ pattern.source_type }}</td>
+                                <td>{{ pattern.edge_type }}</td>
+                                <td>{{ pattern.target_type }}</td>
+                                <td>{{ pattern.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No relationship pattern information available for this ontology.</p>
+                    {% if ontology_data %}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ontology.css') }}">
+<style>
+    .actions form {
+        display: inline-block;
+    }
+    .actions button {
+        margin-left: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Show corresponding tab
+                const tabId = this.getAttribute('data-tab') + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}

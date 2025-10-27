@@ -1,0 +1,734 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#0040be", "font": {"color": "black"}, "id": "0", "label": "HNB R3 0878 20080204 D E Z F.txt\n2.00", "shape": "dot", "size": 20, "title": "ID: 0\nName: HNB R3 0878 20080204 D E Z F.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 2.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#eeff00", "font": {"color": "black"}, "id": "11", "label": "HNB R3 1270 20130809 C E N O.txt\n8.00", "shape": "dot", "size": 20, "title": "ID: 11\nName: HNB R3 1270 20130809 C E N O.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 8.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#50ff00", "font": {"color": "black"}, "id": "18", "label": "HNB R3 1288 20100709 D E Z O.txt\n5.78", "shape": "dot", "size": 20, "title": "ID: 18\nName: HNB R3 1288 20100709 D E Z O.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 5.784\nComponents: 2\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#00fa04", "font": {"color": "black"}, "id": "22", "label": "HNB R3 1288 20130420 C E N O.txt\n4.61", "shape": "dot", "size": 20, "title": "ID: 22\nName: HNB R3 1288 20130420 C E N O.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 4.608\nComponents: 2\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#00fa04", "font": {"color": "black"}, "id": "25", "label": "HNB R3 1288 20130420 D E Z O.txt\n4.61", "shape": "dot", "size": 20, "title": "ID: 25\nName: HNB R3 1288 20130420 D E Z O.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 4.608\nComponents: 2\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "27", "label": "HNB R3 1464 20121008 C E N F.txt\n10.00", "shape": "dot", "size": 20, "title": "ID: 27\nName: HNB R3 1464 20121008 C E N F.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 10.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "31", "label": "HNB R3 1464 20121008 D E Z F.txt\n10.00", "shape": "dot", "size": 20, "title": "ID: 31\nName: HNB R3 1464 20121008 D E Z F.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 10.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#a7ff00", "font": {"color": "black"}, "id": "33", "label": "HNB R3 1858 20060719 C E Z F.txt\n7.00", "shape": "dot", "size": 20, "title": "ID: 33\nName: HNB R3 1858 20060719 C E Z F.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 7.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "37", "label": "HNB R3 1890 20121005 C E S F.txt\n10.00", "shape": "dot", "size": 20, "title": "ID: 37\nName: HNB R3 1890 20121005 C E S F.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 10.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#18ff00", "font": {"color": "black"}, "id": "42", "label": "HNB R3 2094 20100515 D E Z O.txt\n5.00", "shape": "dot", "size": 20, "title": "ID: 42\nName: HNB R3 2094 20100515 D E Z O.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 5.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff3e00", "font": {"color": "black"}, "id": "46", "label": "HNB R3 2274 20101105 C E Z O.txt\n11.00", "shape": "dot", "size": 20, "title": "ID: 46\nName: HNB R3 2274 20101105 C E Z O.txt\nType: file\nhierarchy_level: 0\nPropagated Value: 11.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#0040be", "font": {"color": "black"}, "id": "51", "label": "Channel 0878\n2.00", "shape": "dot", "size": 20, "title": "ID: 51\nName: Channel 0878\nType: channel\nhierarchy: reactor\nchannel_id: 0878\nreactor_type: AGR\noriginal_text: 0878\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843438\nPropagated Value: 2.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#eeff00", "font": {"color": "black"}, "id": "52", "label": "Channel 1270\n8.00", "shape": "dot", "size": 20, "title": "ID: 52\nName: Channel 1270\nType: channel\nhierarchy: reactor\nchannel_id: 1270\nreactor_type: AGR\noriginal_text: 1270\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 8.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#18ff00", "font": {"color": "black"}, "id": "53", "label": "Channel 1288\n5.00", "shape": "dot", "size": 20, "title": "ID: 53\nName: Channel 1288\nType: channel\nhierarchy: reactor\nchannel_id: 1288\nreactor_type: AGR\noriginal_text: 1288\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 5.000\nComponents: 2\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "54", "label": "Channel 1464\n10.00", "shape": "dot", "size": 20, "title": "ID: 54\nName: Channel 1464\nType: channel\nhierarchy: reactor\nchannel_id: 1464\nreactor_type: AGR\noriginal_text: 1464\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 10.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#a7ff00", "font": {"color": "black"}, "id": "55", "label": "Channel 1858\n7.00", "shape": "dot", "size": 20, "title": "ID: 55\nName: Channel 1858\nType: channel\nhierarchy: reactor\nchannel_id: 1858\nreactor_type: AGR\noriginal_text: 1858\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 7.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "56", "label": "Channel 1890\n10.00", "shape": "dot", "size": 20, "title": "ID: 56\nName: Channel 1890\nType: channel\nhierarchy: reactor\nchannel_id: 1890\nreactor_type: AGR\noriginal_text: 1890\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 10.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#18ff00", "font": {"color": "black"}, "id": "57", "label": "Channel 2094\n5.00", "shape": "dot", "size": 20, "title": "ID: 57\nName: Channel 2094\nType: channel\nhierarchy: reactor\nchannel_id: 2094\nreactor_type: AGR\noriginal_text: 2094\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 5.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#ff3e00", "font": {"color": "black"}, "id": "58", "label": "Channel 2274\n11.00", "shape": "dot", "size": 20, "title": "ID: 58\nName: Channel 2274\nType: channel\nhierarchy: reactor\nchannel_id: 2274\nreactor_type: AGR\noriginal_text: 2274\npattern: AGR_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T08:12:35.843941\nPropagated Value: 11.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#0040be", "font": {"color": "black"}, "id": "60", "label": "2008-02-04\n2.00", "shape": "dot", "size": 25, "title": "ID: 60\nName: 2008-02-04\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20080204\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2008\nmonth: 2\nday: 4\nSOURCE NODE\nPropagated Value: 2.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#eeff00", "font": {"color": "black"}, "id": "61", "label": "2013-08-09\n8.00", "shape": "dot", "size": 25, "title": "ID: 61\nName: 2013-08-09\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20130809\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2013\nmonth: 8\nday: 9\nSOURCE NODE\nPropagated Value: 8.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#a7ff00", "font": {"color": "black"}, "id": "62", "label": "2010-07-09\n7.00", "shape": "dot", "size": 25, "title": "ID: 62\nName: 2010-07-09\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20100709\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2010\nmonth: 7\nday: 9\nSOURCE NODE\nPropagated Value: 7.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#00cf2f", "font": {"color": "black"}, "id": "63", "label": "2013-04-20\n4.00", "shape": "dot", "size": 25, "title": "ID: 63\nName: 2013-04-20\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20130420\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2013\nmonth: 4\nday: 20\nSOURCE NODE\nPropagated Value: 4.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "64", "label": "2012-10-08\n10.00", "shape": "dot", "size": 25, "title": "ID: 64\nName: 2012-10-08\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20121008\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2012\nmonth: 10\nday: 8\nSOURCE NODE\nPropagated Value: 10.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#a7ff00", "font": {"color": "black"}, "id": "65", "label": "2006-07-19\n7.00", "shape": "dot", "size": 25, "title": "ID: 65\nName: 2006-07-19\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20060719\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2006\nmonth: 7\nday: 19\nSOURCE NODE\nPropagated Value: 7.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#ff8300", "font": {"color": "black"}, "id": "66", "label": "2012-10-05\n10.00", "shape": "dot", "size": 25, "title": "ID: 66\nName: 2012-10-05\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20121005\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2012\nmonth: 10\nday: 5\nSOURCE NODE\nPropagated Value: 10.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#18ff00", "font": {"color": "black"}, "id": "67", "label": "2094-??-??\n5.00", "shape": "dot", "size": 20, "title": "ID: 67\nName: 2094-??-??\nType: Timestamp\nhierarchy: temporal\noriginal_text: 2094\npattern: YYYY\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2094\nPropagated Value: 5.000\nComponents: 1\nGMM Type: inferred\n\nUse search below to analyze signal"}, {"color": "#18ff00", "font": {"color": "black"}, "id": "68", "label": "2010-05-15\n5.00", "shape": "dot", "size": 25, "title": "ID: 68\nName: 2010-05-15\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20100515\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2010\nmonth: 5\nday: 15\nSOURCE NODE\nPropagated Value: 5.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}, {"color": "#ff3e00", "font": {"color": "black"}, "id": "69", "label": "2010-11-05\n11.00", "shape": "dot", "size": 25, "title": "ID: 69\nName: 2010-11-05\nType: Timestamp\nhierarchy: temporal\noriginal_text: 20101105\npattern: YYYYMMDD\ntemporal_type: date\nhas_date: True\nhas_time: False\nyear: 2010\nmonth: 11\nday: 5\nSOURCE NODE\nPropagated Value: 11.000\nComponents: 1\nGMM Type: source\n\nUse search below to analyze signal"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#999999", "from": "0", "title": "Type: has_channel", "to": "51"}, {"arrows": "to", "color": "#999999", "from": "11", "title": "Type: has_channel", "to": "52"}, {"arrows": "to", "color": "#999999", "from": "18", "title": "Type: has_channel", "to": "53"}, {"arrows": "to", "color": "#999999", "from": "22", "title": "Type: has_channel", "to": "53"}, {"arrows": "to", "color": "#999999", "from": "25", "title": "Type: has_channel", "to": "53"}, {"arrows": "to", "color": "#999999", "from": "27", "title": "Type: has_channel", "to": "54"}, {"arrows": "to", "color": "#999999", "from": "31", "title": "Type: has_channel", "to": "54"}, {"arrows": "to", "color": "#999999", "from": "33", "title": "Type: has_channel", "to": "55"}, {"arrows": "to", "color": "#999999", "from": "37", "title": "Type: has_channel", "to": "56"}, {"arrows": "to", "color": "#999999", "from": "42", "title": "Type: has_channel", "to": "57"}, {"arrows": "to", "color": "#999999", "from": "46", "title": "Type: has_channel", "to": "58"}, {"arrows": "to", "color": "#999999", "from": "0", "title": "Type: has_timestamp", "to": "60"}, {"arrows": "to", "color": "#999999", "from": "11", "title": "Type: has_timestamp", "to": "61"}, {"arrows": "to", "color": "#999999", "from": "18", "title": "Type: has_timestamp", "to": "62"}, {"arrows": "to", "color": "#999999", "from": "22", "title": "Type: has_timestamp", "to": "63"}, {"arrows": "to", "color": "#999999", "from": "25", "title": "Type: has_timestamp", "to": "63"}, {"arrows": "to", "color": "#999999", "from": "27", "title": "Type: has_timestamp", "to": "64"}, {"arrows": "to", "color": "#999999", "from": "31", "title": "Type: has_timestamp", "to": "64"}, {"arrows": "to", "color": "#999999", "from": "33", "title": "Type: has_timestamp", "to": "65"}, {"arrows": "to", "color": "#999999", "from": "37", "title": "Type: has_timestamp", "to": "66"}, {"arrows": "to", "color": "#999999", "from": "42", "title": "Type: has_timestamp", "to": "67"}, {"arrows": "to", "color": "#999999", "from": "42", "title": "Type: has_timestamp", "to": "68"}, {"arrows": "to", "color": "#999999", "from": "46", "title": "Type: has_timestamp", "to": "69"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    
+            <style>
+            #mynetworkid {
+                width: 100% !important;
+                height: 600px !important;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+            }
+
+            body {
+                margin: 0;
+                padding: 10px;
+                font-family: Arial, sans-serif;
+                background: #f8f9fa;
+            }
+
+            .network-container {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                padding: 20px;
+            }
+
+            .graph-title {
+                text-align: center;
+                margin-bottom: 20px;
+                color: #2c3e50;
+                font-size: 24px;
+                font-weight: bold;
+            }
+
+            .search-panel {
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .search-box {
+                position: relative;
+                margin-bottom: 15px;
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: #007bff;
+            }
+
+            .search-dropdown {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                max-height: 300px;
+                overflow-y: auto;
+                z-index: 1000;
+                display: none;
+            }
+
+            .search-item {
+                padding: 12px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+                font-size: 12px;
+            }
+
+            .search-item:hover {
+                background: #f0f8ff;
+            }
+
+            .search-item-main {
+                font-weight: bold;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+
+            .search-item-details {
+                color: #666;
+                font-size: 11px;
+            }
+
+            .selected-nodes {
+                margin-bottom: 15px;
+            }
+
+            .selected-node {
+                display: inline-block;
+                background: #007bff;
+                color: white;
+                padding: 8px 12px;
+                margin: 3px;
+                border-radius: 15px;
+                font-size: 12px;
+            }
+
+            .selected-node-name {
+                font-weight: bold;
+            }
+
+            .selected-node-details {
+                opacity: 0.8;
+                font-size: 10px;
+            }
+
+            .remove-node {
+                margin-left: 8px;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+            .analyze-btn {
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            .analyze-btn:hover {
+                background: #218838;
+            }
+
+            .analyze-btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+            .signal-display {
+                margin-top: 20px;
+                padding: 20px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+
+            .comparison-info {
+                background: #e7f3ff;
+                border: 1px solid #b3d9ff;
+                border-radius: 6px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .node-summary {
+                display: inline-block;
+                margin: 5px 10px 5px 0;
+                padding: 5px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: bold;
+            }
+
+            .legend {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255,255,255,0.95);
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                z-index: 100;
+            }
+
+            .legend h4 {
+                margin: 0 0 10px 0;
+                color: #2c3e50;
+            }
+
+            .legend-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 8px;
+                font-size: 12px;
+            }
+
+            .legend-gradient {
+                width: 80px;
+                height: 15px;
+                margin-right: 8px;
+                border-radius: 3px;
+                border: 1px solid #ccc;
+            }
+
+            .legend-color {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                margin-right: 8px;
+                border: 1px solid #ccc;
+            }
+            </style>
+
+            <div class="network-container">
+                <div class="graph-title">🚀 Propagation Visualization</div>
+
+                <div class="legend">
+                    <h4>Value Legend</h4>
+                    <div class="legend-item">
+                        <div class="legend-gradient" style="background: linear-gradient(to right, #0000ff, #00ff00, #ffff00, #ff0000);"></div>
+                        <span id="value-range-text">Value Range</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #cccccc;"></div>
+                        <span>No Data</span>
+                    </div>
+                </div>
+
+                <div class="search-panel">
+                    <h4>🔍 Node Signal Analysis</h4>
+                    <div class="search-box">
+                        <input type="text" id="node-search" class="search-input" placeholder="Search for nodes by name, type, or properties...">
+                        <div id="search-dropdown" class="search-dropdown"></div>
+                    </div>
+
+                    <div class="selected-nodes" id="selected-nodes"></div>
+
+                    <button id="analyze-selected" class="analyze-btn" disabled>
+                        📊 Compare Selected Signals
+                    </button>
+                </div>
+
+                <div id="signal-display" class="signal-display" style="display: none;">
+                    <h4>Signal Comparison Analysis</h4>
+                    <div id="signal-content"></div>
+                </div>
+            </div>
+
+            <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+            <script>
+            // Store the data globally
+            window.nodeData = {"0": {"id": "0", "type": "file", "propagated_value": 1.9999999999999998, "is_source": false, "gmm_data": {"components": [[1, 0.0833333333333333, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 0878 20080204 D E Z F.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 0878 20080204 D E Z F.txt"}, "11": {"id": "11", "type": "file", "propagated_value": 8, "is_source": false, "gmm_data": {"components": [[1, 0.6388888888888888, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1270 20130809 C E N O.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1270 20130809 C E N O.txt"}, "18": {"id": "18", "type": "file", "propagated_value": 5.784210186831054, "is_source": false, "gmm_data": {"components": [[0.40526327105631543, 0.2685185185185185, 0.07], [0.5947367289436846, 0.5462962962962963, 0.05219517996006498]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1288 20100709 D E Z O.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1288 20100709 D E Z O.txt"}, "22": {"id": "22", "type": "file", "propagated_value": 4.607894906584473, "is_source": false, "gmm_data": {"components": [[0.7973683644718422, 0.2685185185185185, 0.057247081236683844], [0.20263163552815772, 0.5462962962962963, 0.07]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1288 20130420 C E N O.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1288 20130420 C E N O.txt"}, "25": {"id": "25", "type": "file", "propagated_value": 4.607894906584473, "is_source": false, "gmm_data": {"components": [[0.7973683644718422, 0.2685185185185185, 0.057247081236683844], [0.20263163552815772, 0.5462962962962963, 0.07]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1288 20130420 D E Z O.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1288 20130420 D E Z O.txt"}, "27": {"id": "27", "type": "file", "propagated_value": 10, "is_source": false, "gmm_data": {"components": [[1, 0.8240740740740741, 0.057247081236683844]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1464 20121008 C E N F.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1464 20121008 C E N F.txt"}, "31": {"id": "31", "type": "file", "propagated_value": 10, "is_source": false, "gmm_data": {"components": [[1, 0.8240740740740741, 0.057247081236683844]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1464 20121008 D E Z F.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1464 20121008 D E Z F.txt"}, "33": {"id": "33", "type": "file", "propagated_value": 7, "is_source": false, "gmm_data": {"components": [[1, 0.5462962962962963, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1858 20060719 C E Z F.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1858 20060719 C E Z F.txt"}, "37": {"id": "37", "type": "file", "propagated_value": 10, "is_source": false, "gmm_data": {"components": [[1, 0.8240740740740741, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 1890 20121005 C E S F.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 1890 20121005 C E S F.txt"}, "42": {"id": "42", "type": "file", "propagated_value": 5.000000000000001, "is_source": false, "gmm_data": {"components": [[1, 0.36111111111111116, 0.057247081236683844]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 2094 20100515 D E Z O.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 2094 20100515 D E Z O.txt"}, "46": {"id": "46", "type": "file", "propagated_value": 11, "is_source": false, "gmm_data": {"components": [[1, 0.9166666666666666, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "HNB R3 2274 20101105 C E Z O.txt", "type": "file", "hierarchy_level": 0}, "display_name": "HNB R3 2274 20101105 C E Z O.txt"}, "51": {"id": "51", "type": "channel", "propagated_value": 2, "is_source": false, "gmm_data": {"components": [[1, 0.08333333333333331, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 0878", "type": "channel", "hierarchy": "reactor", "channel_id": "0878", "reactor_type": "AGR", "original_text": "0878", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843438"}, "display_name": "Channel 0878"}, "52": {"id": "52", "type": "channel", "propagated_value": 8, "is_source": false, "gmm_data": {"components": [[1, 0.6388888888888888, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 1270", "type": "channel", "hierarchy": "reactor", "channel_id": "1270", "reactor_type": "AGR", "original_text": "1270", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 1270"}, "53": {"id": "53", "type": "channel", "propagated_value": 5, "is_source": false, "gmm_data": {"components": [[0.6666666666666666, 0.2685185185185185, 0.055], [0.3333333333333333, 0.5462962962962963, 0.055]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 1288", "type": "channel", "hierarchy": "reactor", "channel_id": "1288", "reactor_type": "AGR", "original_text": "1288", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 1288"}, "54": {"id": "54", "type": "channel", "propagated_value": 10, "is_source": false, "gmm_data": {"components": [[1, 0.8240740740740741, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 1464", "type": "channel", "hierarchy": "reactor", "channel_id": "1464", "reactor_type": "AGR", "original_text": "1464", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 1464"}, "55": {"id": "55", "type": "channel", "propagated_value": 7, "is_source": false, "gmm_data": {"components": [[1, 0.5462962962962963, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 1858", "type": "channel", "hierarchy": "reactor", "channel_id": "1858", "reactor_type": "AGR", "original_text": "1858", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 1858"}, "56": {"id": "56", "type": "channel", "propagated_value": 10, "is_source": false, "gmm_data": {"components": [[1, 0.8240740740740741, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 1890", "type": "channel", "hierarchy": "reactor", "channel_id": "1890", "reactor_type": "AGR", "original_text": "1890", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 1890"}, "57": {"id": "57", "type": "channel", "propagated_value": 5, "is_source": false, "gmm_data": {"components": [[1, 0.3611111111111111, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 2094", "type": "channel", "hierarchy": "reactor", "channel_id": "2094", "reactor_type": "AGR", "original_text": "2094", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 2094"}, "58": {"id": "58", "type": "channel", "propagated_value": 11, "is_source": false, "gmm_data": {"components": [[1, 0.9166666666666666, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "Channel 2274", "type": "channel", "hierarchy": "reactor", "channel_id": "2274", "reactor_type": "AGR", "original_text": "2274", "pattern": "AGR_PATTERN", "confidence": 0.95, "created": "2025-08-18T08:12:35.843941"}, "display_name": "Channel 2274"}, "60": {"id": "60", "type": "Timestamp", "propagated_value": 2, "is_source": true, "gmm_data": {"components": [[1, 0.08333333333333331, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2008-02-04", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20080204", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["5"], "has_date": true, "has_time": false, "year": 2008, "month": 2, "day": 4}, "display_name": "2008-02-04"}, "61": {"id": "61", "type": "Timestamp", "propagated_value": 8, "is_source": true, "gmm_data": {"components": [[1, 0.6388888888888888, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2013-08-09", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20130809", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["14"], "has_date": true, "has_time": false, "year": 2013, "month": 8, "day": 9}, "display_name": "2013-08-09"}, "62": {"id": "62", "type": "Timestamp", "propagated_value": 7, "is_source": true, "gmm_data": {"components": [[1, 0.5462962962962963, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2010-07-09", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20100709", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["21"], "has_date": true, "has_time": false, "year": 2010, "month": 7, "day": 9}, "display_name": "2010-07-09"}, "63": {"id": "63", "type": "Timestamp", "propagated_value": 4, "is_source": true, "gmm_data": {"components": [[1, 0.2685185185185185, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2013-04-20", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20130420", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["24"], "has_date": true, "has_time": false, "year": 2013, "month": 4, "day": 20}, "display_name": "2013-04-20"}, "64": {"id": "64", "type": "Timestamp", "propagated_value": 10, "is_source": true, "gmm_data": {"components": [[1, 0.8240740740740741, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2012-10-08", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20121008", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["30"], "has_date": true, "has_time": false, "year": 2012, "month": 10, "day": 8}, "display_name": "2012-10-08"}, "65": {"id": "65", "type": "Timestamp", "propagated_value": 7, "is_source": true, "gmm_data": {"components": [[1, 0.5462962962962963, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2006-07-19", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20060719", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["36"], "has_date": true, "has_time": false, "year": 2006, "month": 7, "day": 19}, "display_name": "2006-07-19"}, "66": {"id": "66", "type": "Timestamp", "propagated_value": 10, "is_source": true, "gmm_data": {"components": [[1, 0.8240740740740741, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2012-10-05", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20121005", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["40"], "has_date": true, "has_time": false, "year": 2012, "month": 10, "day": 5}, "display_name": "2012-10-05"}, "67": {"id": "67", "type": "Timestamp", "propagated_value": 5, "is_source": false, "gmm_data": {"components": [[1, 0.3611111111111111, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "original_data": {"value": "2094-??-??", "type": "Timestamp", "hierarchy": "temporal", "original_text": "2094", "pattern": "YYYY", "temporal_type": "date", "source_components": ["44"], "has_date": true, "has_time": false, "year": 2094}, "display_name": "2094-??-??"}, "68": {"id": "68", "type": "Timestamp", "propagated_value": 5, "is_source": true, "gmm_data": {"components": [[1, 0.3611111111111111, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2010-05-15", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20100515", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["45"], "has_date": true, "has_time": false, "year": 2010, "month": 5, "day": 15}, "display_name": "2010-05-15"}, "69": {"id": "69", "type": "Timestamp", "propagated_value": 11, "is_source": true, "gmm_data": {"components": [[1, 0.9166666666666666, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "original_data": {"value": "2010-11-05", "type": "Timestamp", "hierarchy": "temporal", "original_text": "20101105", "pattern": "YYYYMMDD", "temporal_type": "date", "source_components": ["49"], "has_date": true, "has_time": false, "year": 2010, "month": 11, "day": 5}, "display_name": "2010-11-05"}};
+            window.propagationResults = {"propagated_values": {"0": 1.9999999999999998, "11": 8, "18": 5.784210186831054, "22": 4.607894906584473, "25": 4.607894906584473, "27": 10, "31": 10, "33": 7, "37": 10, "42": 5.000000000000001, "46": 11, "51": 2, "52": 8, "53": 5, "54": 10, "55": 7, "56": 10, "57": 5, "58": 11, "60": 2, "61": 8, "62": 7, "63": 4, "64": 10, "65": 7, "66": 10, "67": 5, "68": 5, "69": 11}, "gmm_data": {"0": {"components": [[1, 0.0833333333333333, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "11": {"components": [[1, 0.6388888888888888, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "18": {"components": [[0.40526327105631543, 0.2685185185185185, 0.07], [0.5947367289436846, 0.5462962962962963, 0.05219517996006498]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "22": {"components": [[0.7973683644718422, 0.2685185185185185, 0.057247081236683844], [0.20263163552815772, 0.5462962962962963, 0.07]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "25": {"components": [[0.7973683644718422, 0.2685185185185185, 0.057247081236683844], [0.20263163552815772, 0.5462962962962963, 0.07]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "27": {"components": [[1, 0.8240740740740741, 0.057247081236683844]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "31": {"components": [[1, 0.8240740740740741, 0.057247081236683844]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "33": {"components": [[1, 0.5462962962962963, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "37": {"components": [[1, 0.8240740740740741, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "42": {"components": [[1, 0.36111111111111116, 0.057247081236683844]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "46": {"components": [[1, 0.9166666666666666, 0.05219517996006498]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "51": {"components": [[1, 0.08333333333333331, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "52": {"components": [[1, 0.6388888888888888, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "53": {"components": [[0.6666666666666666, 0.2685185185185185, 0.055], [0.3333333333333333, 0.5462962962962963, 0.055]], "n_components": 2, "total_evidence": 1, "type": "inferred"}, "54": {"components": [[1, 0.8240740740740741, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "55": {"components": [[1, 0.5462962962962963, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "56": {"components": [[1, 0.8240740740740741, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "57": {"components": [[1, 0.3611111111111111, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "58": {"components": [[1, 0.9166666666666666, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "60": {"components": [[1, 0.08333333333333331, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "61": {"components": [[1, 0.6388888888888888, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "62": {"components": [[1, 0.5462962962962963, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "63": {"components": [[1, 0.2685185185185185, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "64": {"components": [[1, 0.8240740740740741, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "65": {"components": [[1, 0.5462962962962963, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "66": {"components": [[1, 0.8240740740740741, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "67": {"components": [[1, 0.3611111111111111, 0.055]], "n_components": 1, "total_evidence": 1, "type": "inferred"}, "68": {"components": [[1, 0.3611111111111111, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}, "69": {"components": [[1, 0.9166666666666666, 0.02]], "n_components": 1, "total_evidence": 1, "type": "source"}}, "source_nodes": [{"node_id": "60", "raw_value": 2}, {"node_id": "61", "raw_value": 8}, {"node_id": "62", "raw_value": 7}, {"node_id": "63", "raw_value": 4}, {"node_id": "64", "raw_value": 10}, {"node_id": "65", "raw_value": 7}, {"node_id": "66", "raw_value": 10}, {"node_id": "68", "raw_value": 5}, {"node_id": "69", "raw_value": 11}], "value_range": [1.1, 11.9], "method": "matrix"};
+            window.selectedNodeIds = new Set();
+
+            console.log('DEBUG: Node data loaded:', Object.keys(window.nodeData).length, 'nodes');
+
+            // Update legend with actual value range
+            const valueRange = window.propagationResults.value_range || [0, 1];
+            document.getElementById('value-range-text').textContent = 
+                valueRange[0].toFixed(2) + ' → ' + valueRange[1].toFixed(2);
+
+            // Search functionality
+            const searchInput = document.getElementById('node-search');
+            const searchDropdown = document.getElementById('search-dropdown');
+            const selectedNodesDiv = document.getElementById('selected-nodes');
+            const analyzeBtn = document.getElementById('analyze-selected');
+
+            // Get all node IDs for searching
+            const allNodeIds = Object.keys(window.nodeData);
+
+            // Function to get node display name (use 'value' property if available)
+            function getNodeDisplayName(nodeId) {
+                const node = window.nodeData[nodeId];
+
+                // Check for common name/value properties
+                if (node.original_data && node.original_data.value) {
+                    return node.original_data.value;
+                }
+                if (node.original_data && node.original_data.name) {
+                    return node.original_data.name;
+                }
+                if (node.original_data && node.original_data.label) {
+                    return node.original_data.label;
+                }
+
+                // Fallback to node ID
+                return nodeId;
+            }
+
+            // Function to get searchable text for a node
+            function getNodeSearchText(nodeId) {
+                const node = window.nodeData[nodeId];
+                const displayName = getNodeDisplayName(nodeId);
+
+                let searchText = `${nodeId} ${displayName} ${node.type}`;
+
+                // Add all original properties to search
+                if (node.original_data) {
+                    Object.entries(node.original_data).forEach(([key, value]) => {
+                        if (typeof value === 'string' || typeof value === 'number') {
+                            searchText += ` ${key}:${value}`;
+                        }
+                    });
+                }
+
+                return searchText.toLowerCase();
+            }
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+
+                if (query.length < 1) {
+                    searchDropdown.style.display = 'none';
+                    return;
+                }
+
+                // Filter nodes based on search
+                const matches = allNodeIds.filter(nodeId => {
+                    const searchText = getNodeSearchText(nodeId);
+                    return searchText.includes(query);
+                }).slice(0, 15); // Show max 15 results
+
+                if (matches.length > 0) {
+                    searchDropdown.innerHTML = matches.map(nodeId => {
+                        const node = window.nodeData[nodeId];
+                        const displayName = getNodeDisplayName(nodeId);
+                        const isSelected = window.selectedNodeIds.has(nodeId);
+
+                        // Build property details
+                        let details = `Type: ${node.type}`;
+                        if (node.propagated_value !== null) {
+                            details += ` • Value: ${node.propagated_value.toFixed(3)}`;
+                        }
+                        if (node.is_source) {
+                            details += ` • SOURCE`;
+                        }
+
+                        return `
+                            <div class="search-item" data-node-id="${nodeId}" style="${isSelected ? 'opacity: 0.5;' : ''}">
+                                <div class="search-item-main">${displayName} (${nodeId})</div>
+                                <div class="search-item-details">${details}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    searchDropdown.style.display = 'block';
+                } else {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+
+            // Handle search item clicks
+            searchDropdown.addEventListener('click', function(e) {
+                const searchItem = e.target.closest('.search-item');
+                if (searchItem) {
+                    const nodeId = searchItem.getAttribute('data-node-id');
+                    addSelectedNode(nodeId);
+                    searchInput.value = '';
+                    searchDropdown.style.display = 'none';
+                }
+            });
+
+            // Hide dropdown when clicking elsewhere
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-box')) {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+
+            function addSelectedNode(nodeId) {
+                if (!window.selectedNodeIds.has(nodeId)) {
+                    window.selectedNodeIds.add(nodeId);
+                    updateSelectedNodesDisplay();
+                    updateAnalyzeButton();
+                }
+            }
+
+            function removeSelectedNode(nodeId) {
+                window.selectedNodeIds.delete(nodeId);
+                updateSelectedNodesDisplay();
+                updateAnalyzeButton();
+            }
+
+            function updateSelectedNodesDisplay() {
+                const selectedArray = Array.from(window.selectedNodeIds);
+                selectedNodesDiv.innerHTML = selectedArray.map(nodeId => {
+                    const displayName = getNodeDisplayName(nodeId);
+                    const node = window.nodeData[nodeId];
+
+                    return `
+                        <span class="selected-node">
+                            <div class="selected-node-name">${displayName}</div>
+                            <div class="selected-node-details">${node.type} • ${nodeId}</div>
+                            <span class="remove-node" onclick="removeSelectedNode('${nodeId}')">&times;</span>
+                        </span>
+                    `;
+                }).join('');
+            }
+
+            function updateAnalyzeButton() {
+                analyzeBtn.disabled = window.selectedNodeIds.size === 0;
+                if (window.selectedNodeIds.size > 1) {
+                    analyzeBtn.textContent = `📊 Compare ${window.selectedNodeIds.size} Signals`;
+                } else {
+                    analyzeBtn.textContent = '📊 Analyze Signal';
+                }
+            }
+
+            // Analyze selected nodes
+            analyzeBtn.addEventListener('click', function() {
+                analyzeSelectedNodes();
+            });
+
+            function analyzeSelectedNodes() {
+                const selectedArray = Array.from(window.selectedNodeIds);
+                if (selectedArray.length === 0) return;
+
+                const signalDisplay = document.getElementById('signal-display');
+                const signalContent = document.getElementById('signal-content');
+
+                signalDisplay.style.display = 'block';
+                signalContent.innerHTML = '<div style="text-align: center; padding: 20px;">Generating comparison plot...</div>';
+
+                // Create comparison plot
+                setTimeout(() => {
+                    generateComparisonPlot(selectedArray);
+                }, 100);
+            }
+
+            function generateComparisonPlot(nodeIds) {
+                const signalContent = document.getElementById('signal-content');
+
+                // Color palette for different nodes
+                const nodeColors = [
+                    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', 
+                    '#dda0dd', '#98d8c8', '#ff9f43', '#a29bfe', '#fd79a8',
+                    '#00b894', '#e17055', '#0984e3', '#6c5ce7', '#fdcb6e'
+                ];
+
+                // Build comparison info
+                let comparisonHtml = '<div class="comparison-info">';
+                comparisonHtml += '<h5>📊 Comparing Signals:</h5>';
+
+                nodeIds.forEach((nodeId, index) => {
+                    const node = window.nodeData[nodeId];
+                    const displayName = getNodeDisplayName(nodeId);
+                    const color = nodeColors[index % nodeColors.length];
+
+                    comparisonHtml += `
+                        <div class="node-summary" style="background-color: ${color}20; border: 2px solid ${color};">
+                            <strong>${displayName}</strong> (${node.type})
+                            ${node.propagated_value !== null ? ' • ' + node.propagated_value.toFixed(3) : ''}
+                            ${node.is_source ? ' • SOURCE' : ''}
+                        </div>
+                    `;
+                });
+
+                comparisonHtml += '</div>';
+                comparisonHtml += '<div id="comparison-plot" style="width: 100%; height: 600px;"></div>';
+
+                signalContent.innerHTML = comparisonHtml;
+
+                // Generate the comparison plot
+                const plotDiv = document.getElementById('comparison-plot');
+
+                // Create x-range for plotting
+                const xRange = [];
+                const step = (valueRange[1] - valueRange[0]) / 300;
+                for (let x = valueRange[0]; x <= valueRange[1]; x += step) {
+                    xRange.push(x);
+                }
+
+                const traces = [];
+                let hasValidData = false;
+
+                // Plot each node's signal
+                nodeIds.forEach((nodeId, nodeIndex) => {
+                    const node = window.nodeData[nodeId];
+                    const displayName = getNodeDisplayName(nodeId);
+                    const baseColor = nodeColors[nodeIndex % nodeColors.length];
+
+                    if (node.gmm_data && node.gmm_data.components && node.gmm_data.components.length > 0) {
+                        hasValidData = true;
+
+                        // Plot individual components for this node
+                        node.gmm_data.components.forEach((comp, compIndex) => {
+                            const weight = comp[0];
+                            const mean = comp[1];
+                            const std = comp[2];
+
+                            // Denormalize for actual values
+                            const actualMean = mean * (valueRange[1] - valueRange[0]) + valueRange[0];
+                            const actualStd = std * (valueRange[1] - valueRange[0]);
+
+                            const yValues = xRange.map(x => {
+                                const gaussian = weight * (1 / (actualStd * Math.sqrt(2 * Math.PI))) * 
+                                               Math.exp(-0.5 * Math.pow((x - actualMean) / actualStd, 2));
+                                return gaussian;
+                            });
+
+                            traces.push({
+                                x: xRange,
+                                y: yValues,
+                                type: 'scatter',
+                                mode: 'lines',
+                                name: `${displayName} C${compIndex + 1}`,
+                                line: { color: baseColor, width: 1, dash: 'dot' },
+                                opacity: 0.6,
+                                showlegend: false
+                            });
+                        });
+
+                        // Plot combined signal for this node
+                        const combinedY = xRange.map(x => {
+                            let total = 0;
+                            node.gmm_data.components.forEach(comp => {
+                                const weight = comp[0];
+                                const mean = comp[1];
+                                const std = comp[2];
+                                const actualMean = mean * (valueRange[1] - valueRange[0]) + valueRange[0];
+                                const actualStd = std * (valueRange[1] - valueRange[0]);
+                                const gaussian = weight * (1 / (actualStd * Math.sqrt(2 * Math.PI))) * 
+                                               Math.exp(-0.5 * Math.pow((x - actualMean) / actualStd, 2));
+                                total += gaussian;
+                            });
+                            return total;
+                        });
+
+                        traces.push({
+                            x: xRange,
+                            y: combinedY,
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: `${displayName} (Combined)`,
+                            line: { color: baseColor, width: 3 },
+                            opacity: 1.0
+                        });
+
+                        // Add vertical line for propagated value
+                        if (node.propagated_value !== null) {
+                            const maxY = Math.max.apply(Math, combinedY);
+                            traces.push({
+                                x: [node.propagated_value, node.propagated_value],
+                                y: [0, maxY * 1.1],
+                                type: 'scatter',
+                                mode: 'lines',
+                                name: `${displayName} Final`,
+                                line: { color: baseColor, dash: 'dash', width: 2 },
+                                opacity: 0.8
+                            });
+                        }
+                    }
+                });
+
+                if (!hasValidData) {
+                    plotDiv.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;"><h3>No Signal Data Available</h3><p>None of the selected nodes have signal components to display.</p></div>';
+                    return;
+                }
+
+                const layout = {
+                    title: { 
+                        text: `Signal Comparison: ${nodeIds.map(id => getNodeDisplayName(id)).join(' vs ')}`,
+                        font: { size: 18 }
+                    },
+                    xaxis: { title: 'Value', gridcolor: '#e1e5e9', showgrid: true },
+                    yaxis: { title: 'Probability Density', gridcolor: '#e1e5e9', showgrid: true },
+                    showlegend: true,
+                    legend: { x: 0.02, y: 0.98 },
+                    margin: { t: 60, b: 60, l: 80, r: 60 },
+                    plot_bgcolor: '#fafafa',
+                    paper_bgcolor: 'white'
+                };
+
+                const config = { responsive: true, displayModeBar: true, 'displaylogo': false };
+
+                Plotly.newPlot(plotDiv, traces, layout, config);
+            }
+
+            // Make functions global so they can be called from HTML
+            window.removeSelectedNode = removeSelectedNode;
+            window.getNodeDisplayName = getNodeDisplayName;
+            </script>
+            </body>
+</html>

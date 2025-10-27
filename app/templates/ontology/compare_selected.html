@@ -1,0 +1,62 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Select Graph - Ontology Comparison{% endblock %}
+
+{% block content %}
+<div class="selection-container">
+    <h1>Select Graph for Ontology Comparison</h1>
+    
+    <p class="instruction">
+        Select a graph to compare its inferred ontology with the loaded OWL ontologies.
+    </p>
+    
+    <div class="graph-list">
+        {% if graphs %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Graph ID</th>
+                        <th>Nodes</th>
+                        <th>Edges</th>
+                        <th>Source</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for graph in graphs %}
+                    <tr>
+                        <td>{{ graph.id }}</td>
+                        <td>{{ graph.node_count }}</td>
+                        <td>{{ graph.edge_count }}</td>
+                        <td>{{ graph.source }}</td>
+                        <td>
+                            <a href="{{ url_for('ontology.compare_ontologies', graph_id=graph.id) }}" class="btn btn-small">Compare</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="no-data-message">
+                <p>No graphs available for comparison.</p>
+                <a href="{{ url_for('upload.upload_page') }}" class="btn">Upload Data</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ontology.css') }}">
+<style>
+    .instruction {
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+    .selection-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+</style>
+{% endblock %}

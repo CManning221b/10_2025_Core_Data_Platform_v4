@@ -1,0 +1,108 @@
+<!-- app/templates/instance_graph/instance_graph_details.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}Graph Details - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="graph-details-container">
+    <div class="header">
+        <h1>Graph Details</h1>
+        <div class="actions">
+            <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn">View Graph</a>
+            <a href="{{ url_for('instance.list_graphs') }}" class="btn">All Graphs</a>
+        </div>
+    </div>
+
+    <div class="graph-summary">
+        <h2>Summary</h2>
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.node_count }}</div>
+                <div class="stat-label">Nodes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.edge_count }}</div>
+                <div class="stat-label">Edges</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.node_types|length }}</div>
+                <div class="stat-label">Node Types</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.edge_types|length }}</div>
+                <div class="stat-label">Edge Types</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="graph-details">
+        <div class="detail-section">
+            <h2>Node Types</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for type, count in stats.node_types.items() %}
+                    <tr>
+                        <td>{{ type }}</td>
+                        <td>{{ count }}</td>
+                        <td>{{ ((count / stats.node_count) * 100)|round(1) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail-section">
+            <h2>Edge Types</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for type, count in stats.edge_types.items() %}
+                    <tr>
+                        <td>{{ type }}</td>
+                        <td>{{ count }}</td>
+                        <td>{{ ((count / stats.edge_count) * 100)|round(1) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail-section">
+            <h2>Additional Metadata</h2>
+            <table class="details-table">
+                <tbody>
+                    <tr>
+                        <th>Graph ID</th>
+                        <td>{{ graph_id }}</td>
+                    </tr>
+                    {% if graph_data.metadata %}
+                    {% for key, value in graph_data.metadata.items() %}
+                    <tr>
+                        <th>{{ key|replace('_', ' ')|title }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instance_graph.css') }}">
+{% endblock %}

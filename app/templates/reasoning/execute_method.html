@@ -1,0 +1,624 @@
+{% extends 'base/base.html' %}
+{% block title %}Method Execution - Graph Reasoning System{% endblock %}
+{% block content %}
+<div class="execution-container">
+    <div class="header">
+        <h1>Execute Method: {{ method.name }}</h1>
+        <div class="actions">
+            <a href="{{ url_for('reasoning.analyze_instance', graph_id=graph_id) }}" class="btn">Back to Analysis</a>
+            <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn">View Graph</a>
+        </div>
+    </div>
+<div class="method-details">
+    <div class="method-info">
+        <h2>Method Information</h2>
+        <div class="info-panel">
+            <div class="info-row">
+                <div class="info-label">Method ID:</div>
+                <div class="info-value">{{ method.id }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Description:</div>
+                <div class="info-value">{{ method.description }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Applies To:</div>
+                <div class="info-value">
+                    {% if method.appliesTo %}
+                    <ul class="applies-to-list">
+                        {% for class_name in method.appliesTo %}
+                        <li>{{ class_name }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <span class="no-value">No class associations defined</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Implemented By:</div>
+                <div class="info-value">
+                    {% if method.implementedBy %}
+                    <ul class="implemented-by-list">
+                        {% for step_id in method.implementedBy %}
+                        <li>{{ step_id }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <span class="no-value">No implementations in processes</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Implementable:</div>
+                <div class="info-value">
+                    {% if method.implementable %}
+                    <span class="implementable">✓ Method has implementation code</span>
+                    {% else %}
+                    <span class="not-implementable">✗ No implementation available</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="execution-form">
+        <h2>Execute Method</h2>
+        
+        {% if not method.implementable %}
+        <div class="warning-panel">
+            <p>This method does not have an implementation yet. You can still submit the form, but the execution will be simulated.</p>
+        </div>
+        {% endif %}
+        
+        <form action="{{ url_for('reasoning.execute_method') }}" method="post">
+            <input type="hidden" name="graph_id" value="{{ graph_id }}">
+            <input type="hidden" name="method_id" value="{{ method.id }}">
+            
+            <div class="form-group">
+                <label for="parameters">Parameters (JSON):</label>
+                <textarea name="parameters" id="parameters" rows="5" class="form-control">{{ default_parameters }}</textarea>
+                <small class="form-text">Optional: Provide parameters as JSON object</small>
+            </div>
+            
+            {% if method.id == "reason:FileExtensionMethod" %}
+            <div class="form-help">
+                <h3>FileExtensionMethod Parameters</h3>
+                <p>This method doesn't require any parameters. It will extract extensions from all File nodes in the graph.</p>
+            </div>
+            {% elif method.id == "reason:FolderFileStatsMethod" %}
+            <div class="form-help">
+                <h3>FolderFileStatsMethod Parameters</h3>
+                <p>This method doesn't require any parameters. It will calculate statistics for all Folder nodes in the graph.</p>
+            </div>
+            {% elif method.id == "reason:GenerateHistogramMethod" %}
+            <div class="form-help">
+                <h3>GenerateHistogramMethod Parameters</h3>
+                <p>Supported parameters:</p>
+                <ul>
+                    <li><code>property</code>: The property to histogram (default: "extension")</li>
+                    <li><code>bin_count</code>: Number of bins for numeric histograms (default: 5)</li>
+                </ul>
+                <p>Example:</p>
+                <pre>{"property": "size", "bin_count": 10}</pre>
+            </div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Execute Method</button>
+                <a href="{{ url_for('reasoning.analyze_instance', graph_id=graph_id) }}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if execution_result %}
+<div class="execution-results">
+    <h2>Execution Results</h2>
+    
+    <div class="result-panel {% if execution_result.success %}success{% else %}error{% endif %}">
+        <div class="result-header">
+            {% if execution_result.success %}
+            <div class="result-icon">✓</div>
+            <h3>Method Successfully Executed</h3>
+            {% else %}
+            <div class="result-icon">✗</div>
+            <h3>Execution Failed</h3>
+            {% endif %}
+        </div>
+        
+        <div class="result-body">
+            {% if execution_result.success %}
+            <div class="result-message">{{ execution_result.message }}</div>
+            
+            {% if execution_result.changes %}
+            <div class="changes-summary">
+                <h4>Changes Made:</h4>
+                <ul class="changes-list">
+                    {% if execution_result.changes.nodes_added %}
+                    <li>Nodes Added: {{ execution_result.changes.nodes_added }}</li>
+                    {% endif %}
+                    
+                    {% if execution_result.changes.edges_added %}
+                    <li>Edges Added: {{ execution_result.changes.edges_added }}</li>
+                    {% endif %}
+                    
+                    {% if execution_result.changes.processed_files %}
+                    <li>Files Processed: {{ execution_result.changes.processed_files }}</li>
+                    {% endif %}
+                    
+                    {% if execution_result.changes.processed_folders %}
+                    <li>Folders Processed: {{ execution_result.changes.processed_folders }}</li>
+                    {% endif %}
+                    
+                    {% if execution_result.changes.extensions_added %}
+                    <li>Extensions Extracted: {{ execution_result.changes.extensions_added }}</li>
+                    {% endif %}
+                    
+                    {% if execution_result.changes.stats_added %}
+                    <li>Statistics Generated: {{ execution_result.changes.stats_added }}</li>
+                    {% endif %}
+                    
+                    {% if execution_result.changes.histograms_added %}
+                    <li>Histograms Created: {{ execution_result.changes.histograms_added }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            {% if execution_result.changes.extension_counts %}
+            <div class="data-visualization">
+                <h4>Extension Distribution:</h4>
+                <div class="histogram-container">
+                    <div class="histogram-chart" id="extensionChart"></div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if execution_result.changes.histogram_data %}
+            <div class="data-visualization">
+                <h4>Histogram Data:</h4>
+                <div class="histogram-container">
+                    <div class="histogram-chart" id="histogramChart"></div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if execution_result.changes.folder_stats %}
+            <div class="data-visualization">
+                <h4>Folder Statistics:</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Folder</th>
+                            <th>File Count</th>
+                            <th>Total Size</th>
+                            <th>Avg Size</th>
+                            <th>Extensions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for folder_id, stats in execution_result.changes.folder_stats.items() %}
+                        <tr>
+                            <td>{{ folder_id }}</td>
+                            <td>{{ stats.file_count }}</td>
+                            <td>{% if stats.size_stats %}{{ stats.size_stats.total_size }}{% else %}N/A{% endif %}</td>
+                            <td>{% if stats.size_stats %}{{ "%.2f"|format(stats.size_stats.avg_size) }}{% else %}N/A{% endif %}</td>
+                            <td>
+                                {% if stats.extension_counts %}
+                                <ul class="extension-list">
+                                    {% for ext, count in stats.extension_counts.items() %}
+                                    <li>{{ ext }}: {{ count }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            {% endif %}
+            
+            {% else %}
+            <div class="error-details">
+                <div class="error-message">{{ execution_result.error }}</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="result-actions">
+            <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn">View Updated Graph</a>
+            <a href="{{ url_for('reasoning.analyze_instance', graph_id=graph_id) }}" class="btn">Back to Analysis</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+</div>
+{% endblock %}
+{% block additional_css %}
+<style>
+    /* Container layout */
+    .execution-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    /* Method details layout */
+    .method-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    /* Info panel */
+    .info-panel {
+        background: #f8f8f8;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        font-weight: bold;
+        width: 120px;
+        flex-shrink: 0;
+    }
+
+    .info-value {
+        flex: 1;
+    }
+
+    .applies-to-list, .implemented-by-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .applies-to-list li {
+        display: inline-block;
+        background: #e8f4f8;
+        border-radius: 4px;
+        padding: 2px 6px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        font-size: 0.9em;
+    }
+
+    .implemented-by-list li {
+        margin-bottom: 4px;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+
+    .implementable {
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .not-implementable {
+        color: #e74c3c;
+    }
+
+    .no-value {
+        color: #999;
+        font-style: italic;
+    }
+
+    /* Execution form */
+    .execution-form {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .form-text {
+        font-size: 0.85em;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .form-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .form-help {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        border-left: 4px solid #3498db;
+    }
+
+    .form-help h3 {
+        margin-top: 0;
+        font-size: 1.1em;
+    }
+
+    .form-help pre {
+        background: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        overflow-x: auto;
+    }
+
+    .warning-panel {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border-left: 4px solid #ffc107;
+    }
+
+    /* Execution results */
+    .execution-results {
+        margin-top: 30px;
+    }
+
+    .result-panel {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .result-panel.success {
+        border-top: 5px solid #27ae60;
+    }
+
+    .result-panel.error {
+        border-top: 5px solid #e74c3c;
+    }
+
+    .result-header {
+        padding: 15px;
+        background: #f8f8f8;
+        display: flex;
+        align-items: center;
+    }
+
+    .result-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+
+    .success .result-icon {
+        background: #27ae60;
+        color: white;
+    }
+
+    .error .result-icon {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .result-header h3 {
+        margin: 0;
+    }
+
+    .result-body {
+        padding: 20px;
+    }
+
+    .result-message {
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+
+    .error-details {
+        background: #fdf0ef;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #e74c3c;
+    }
+
+    .changes-summary {
+        margin-top: 20px;
+    }
+
+    .changes-list {
+        list-style-type: none;
+        padding-left: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .changes-list li {
+        background: #f5f5f5;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+    .data-visualization {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .histogram-container {
+        height: 300px;
+        margin-top: 15px;
+    }
+
+    .histogram-chart {
+        width: 100%;
+        height: 100%;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .data-table th, .data-table td {
+        padding: 10px;
+        border: 1px solid #eee;
+        text-align: left;
+    }
+
+    .data-table th {
+        background: #f5f5f5;
+        font-weight: bold;
+    }
+
+    .extension-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .result-actions {
+        padding: 15px;
+        background: #f8f8f8;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .method-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+{% block additional_js %}
+{% if execution_result and execution_result.success %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if execution_result.changes.extension_counts %}
+        // Render extension chart
+        const extensionCtx = document.getElementById('extensionChart').getContext('2d');
+        const extensionData = {{ execution_result.changes.extension_counts|tojson }};
+        
+        new Chart(extensionCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(extensionData),
+                datasets: [{
+                    label: 'Number of Files',
+                    data: Object.values(extensionData),
+                    backgroundColor: [
+                        '#36a2eb', '#ff6384', '#4bc0c0', '#ffcd56', '#9966ff',
+                        '#c9cbcf', '#ff9f40', '#8ac926', '#1982c4', '#6a4c93'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'File Extensions'
+                    }
+                }
+            }
+        });
+        {% endif %}
+        
+        {% if execution_result.changes.histogram_data %}
+        // Render histogram chart
+        const histogramCtx = document.getElementById('histogramChart').getContext('2d');
+        const histogramData = {{ execution_result.changes.histogram_data|tojson }};
+        
+        new Chart(histogramCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(histogramData),
+                datasets: [{
+                    label: 'Count',
+                    data: Object.values(histogramData),
+                    backgroundColor: [
+                        '#36a2eb', '#ff6384', '#4bc0c0', '#ffcd56', '#9966ff',
+                        '#c9cbcf', '#ff9f40', '#8ac926', '#1982c4', '#6a4c93'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: '{{ execution_result.changes.property|capitalize if execution_result.changes.property else "Data" }} Distribution'
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endif %}
+{% endblock %}

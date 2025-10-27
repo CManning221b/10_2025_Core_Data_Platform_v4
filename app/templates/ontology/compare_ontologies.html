@@ -1,0 +1,452 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Ontology Comparison - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="ontology-view-container">
+    <div class="header">
+        <h1>Ontology Comparison</h1>
+        <div class="actions">
+            <a href="{{ url_for('ontology.loaded_ontology') }}" class="btn">OWL Ontology</a>
+            <a href="{{ url_for('ontology.extract_ontology', graph_id=graph_id) }}" class="btn">Inferred Ontology</a>
+        </div>
+    </div>
+
+    <div class="comparison-summary">
+        <h2>Comparison Results</h2>
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ comparison.matching_classes|length }}</div>
+                <div class="stat-label">Matching Classes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ comparison.only_in_loaded|length }}</div>
+                <div class="stat-label">Only in OWL</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ comparison.only_in_inferred|length }}</div>
+                <div class="stat-label">Only in Inferred</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ comparison.methods|length }}</div>
+                <div class="stat-label">Methods</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="visualization-legend">
+    <div class="legend-item">
+        <span class="legend-color legend-matching"></span>
+        <span>Matching Classes</span>
+    </div>
+    <div class="legend-item">
+        <span class="legend-color legend-fuzzy"></span>
+        <span> Fuzzy Matches</span>
+    </div>
+    <div class="legend-item">
+        <span class="legend-color legend-method"></span>
+        <span>Method Classes</span>
+    </div>
+    </div>
+
+    <div class="visualization-tabs">
+        <div class="tab-header">
+            <div class="tab-btn active" data-tab="visualizations">Visualizations</div>
+            <div class="tab-btn" data-tab="matches">Matching Classes</div>
+            <div class="tab-btn" data-tab="methods">Methods</div>
+            <div class="tab-btn" data-tab="differences">Differences</div>
+        </div>
+
+        <div class="tab-content">
+        <div class="tab-pane active" id="visualizations-tab">
+            <h2>Side-by-Side Comparison</h2>
+
+            <!-- Visualization Legend -->
+            <div class="visualization-legend">
+                <div class="legend-item">
+                    <span class="legend-color legend-matching"></span>
+                    <span>Matching Classes ({{ comparison.matching_classes|length }})</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-fuzzy"></span>
+                    <span>Fuzzy Matches ({{ comparison.fuzzy_matching_classes|length }})</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color legend-method"></span>
+                    <span>Method Classes ({{ comparison.methods|length }})</span>
+                </div>
+            </div>
+
+            <div class="visualization-comparison">
+                <div class="visualization-column">
+                    <h3>OWL Ontology</h3>
+                    <div class="visualization-container">
+                        <iframe src="{{ url_for('static', filename='visualizations/' + loaded_vis_path) }}"
+                                width="100%" height="500px" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <div class="visualization-column">
+                    <h3>Inferred Ontology</h3>
+                    <div class="visualization-container">
+                        <iframe src="{{ url_for('static', filename='visualizations/' + inferred_vis_path) }}"
+                                width="100%" height="500px" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <!-- Matches Tab -->
+            <div class="tab-pane" id="matches-tab">
+                <h2>Matching Classes</h2>
+                <div class="matches-container">
+                    <!-- Exact Matches -->
+                    <div class="match-section">
+                        <h3>Exact Matches</h3>
+                        {% if comparison.matching_classes %}
+                        <div class="matches-list">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Class Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for class_name in comparison.matching_classes %}
+                                    <tr>
+                                        <td class="matching-class">{{ class_name }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="no-data-message">
+                            <p>No exact matching classes found between ontologies.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Fuzzy Matches -->
+                    {% if comparison.fuzzy_matching_classes %}
+                    <div class="match-section">
+                        <h3>Fuzzy Matches</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>OWL Class</th>
+                                    <th>Inferred Class</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for loaded, inferred_list in comparison.fuzzy_matching_classes.items() %}
+                                {% for inferred, score, reason in inferred_list %}
+                                    <tr>
+                                        <td>{{ loaded }}</td>
+                                        <td>{{ inferred }}</td>
+                                        <td>{{ reason }}</td>
+                                        <td>{{ score }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Methods Tab -->
+            <div class="tab-pane" id="methods-tab">
+                <h2>Methods</h2>
+                {% if comparison.methods %}
+                <div class="methods-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Method Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for method in comparison.methods %}
+                            <tr>
+                                <td class="method-class">{{ method }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No methods found in the ontologies.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Differences Tab -->
+            <div class="tab-pane" id="differences-tab">
+                <h2>Differences</h2>
+                <div class="differences-container">
+                    <div class="difference-column">
+                        <h3>Only in OWL Ontology</h3>
+                        {% if comparison.only_in_loaded %}
+                        <ul class="difference-list">
+                            {% for class_name in comparison.only_in_loaded %}
+                            <li>{{ class_name }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>No classes unique to OWL ontology.</p>
+                        {% endif %}
+                    </div>
+                    <div class="difference-column">
+                        <h3>Only in Inferred Ontology</h3>
+                        {% if comparison.only_in_inferred %}
+                        <ul class="difference-list">
+                            {% for class_name in comparison.only_in_inferred %}
+                            <li>{{ class_name }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>No classes unique to inferred ontology. </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ontology.css') }}">
+<style>
+    /* Visualization container styles */
+    .visualization-comparison {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .visualization-column {
+        flex: 1;
+        background: #f8f8f8;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .visualization-column h3 {
+        margin: 0;
+        padding: 12px 15px;
+        background: #f0f0f0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .visualization-container {
+        padding: 5px;
+    }
+
+    /* Legend styles */
+    .visualization-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        margin-right: 5px;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .legend-matching {
+        background-color: #27ae60;
+    }
+
+    .legend-fuzzy {
+        background-color: #3498db;
+    }
+
+    .legend-method {
+        background-color: #e67e22;
+    }
+
+    /* Tab styles */
+    .tab-header {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    .tab-btn {
+        padding: 10px 20px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+        background-color: #f5f5f5;
+    }
+
+    .tab-btn.active {
+        border-bottom: 3px solid #3498db;
+        font-weight: 600;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* Differences layout */
+    .differences-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    .difference-column {
+        flex: 1;
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Table styles */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    .data-table th, .data-table td {
+        padding: 10px 15px;
+        border: 1px solid #eee;
+        text-align: left;
+    }
+
+    .data-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+
+    .data-table tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+
+    /* Class styles */
+    .matching-class {
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .fuzzy-match {
+        color: #3498db;
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    .method-class {
+        color: #e67e22;
+        font-weight: bold;
+    }
+
+    /* List styles */
+    .class-list, .difference-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .class-list li {
+        padding: 8px 10px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+
+    .class-list li.matching {
+        background-color: rgba(39, 174, 96, 0.1);
+        border-left: 4px solid #27ae60;
+    }
+
+    .class-list li.fuzzy-matching {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-left: 4px solid #3498db;
+    }
+
+    .class-list li.method {
+        background-color: rgba(230, 126, 34, 0.1);
+        border-left: 4px solid #e67e22;
+    }
+
+    .difference-list li {
+        padding: 6px 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .difference-list li:last-child {
+        border-bottom: none;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .visualization-comparison, .differences-container {
+            flex-direction: column;
+        }
+
+        .tab-header {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Show corresponding tab
+                const tabId = this.getAttribute('data-tab') + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}

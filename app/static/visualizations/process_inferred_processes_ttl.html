@@ -1,0 +1,193 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Inferred Processes</title>
+            <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                }
+
+                h1, h2 {
+                    color: #333;
+                }
+
+                #visualization {
+                    width: 100%;
+                    height: 700px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+
+                .info-panel {
+                    background: #f8f8f8;
+                    padding: 15px;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                }
+
+                .legend {
+                    display: flex;
+                    flex-wrap: wrap;
+                    margin-bottom: 15px;
+                }
+
+                .legend-item {
+                    display: flex;
+                    align-items: center;
+                    margin-right: 20px;
+                    margin-bottom: 10px;
+                }
+
+                .legend-color {
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 5px;
+                    border: 1px solid #ccc;
+                }
+
+                .dashed-line {
+                    width: 30px;
+                    height: 0;
+                    border-top: 2px dashed #FFD700;
+                    margin-right: 5px;
+                }
+
+                .controls {
+                    margin-bottom: 15px;
+                }
+
+                button {
+                    padding: 6px 12px;
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin-right: 10px;
+                }
+
+                button:hover {
+                    background: #2980b9;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Inferred Processes</h1>
+
+            <div class="info-panel">
+                <p><strong>File:</strong> inferred_processes.ttl</p>
+                <p><strong>Description:</strong> Process extracted from OWL/TTL file</p>
+                <p><strong>Steps:</strong> 22</p>
+            </div>
+
+            <div class="controls">
+                <button onclick="resetView()">Reset View</button>
+                <button onclick="togglePhysics()">Toggle Physics</button>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#FFD700; transform: rotate(45deg);"></div>
+                    <span>Process</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#3498db; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+                    <span>Start Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#e74c3c; border-radius: 0;"></div>
+                    <span>End Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#2ecc71;"></div>
+                    <span>Method Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#9b59b6; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div>
+                    <span>Subprocess Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="dashed-line"></div>
+                    <span>Process Start</span>
+                </div>
+            </div>
+
+            <div id="visualization"></div>
+
+            <script type="text/javascript">
+                // Initialize vis.js network
+                var container = document.getElementById('visualization');
+
+                // Create nodes and edges datasets
+                var nodes = new vis.DataSet([{"id": "process:P0", "label": "P0", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P1", "label": "P1", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P2", "label": "P2", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P3", "label": "P3", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P4", "label": "P4", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P5", "label": "P5", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P6", "label": "P6", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:P0_Start", "label": "P0_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P1_Start", "label": "P1_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P2_Start", "label": "P2_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P3_Start", "label": "P3_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P4_Start", "label": "P4_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P5_Start", "label": "P5_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P6_Start", "label": "P6_Start", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P0_End", "label": "P0_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P1_End", "label": "P1_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P2_End", "label": "P2_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P3_End", "label": "P3_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P4_End", "label": "P4_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P5_End", "label": "P5_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P6_End", "label": "P6_End", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P0_DateDetection", "label": "P0_DateDetection", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P1_DateDetection", "label": "P1_DateDetection", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P1_TimelineGeneration", "label": "P1_TimelineGeneration", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P2_FileExtension", "label": "P2_FileExtension", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P3_TimelineGeneration", "label": "P3_TimelineGeneration", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P4_Histogram", "label": "P4_Histogram", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P5_TimelineGeneration", "label": "P5_TimelineGeneration", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:P6_TimelineGeneration", "label": "P6_TimelineGeneration", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}]);
+                var edges = new vis.DataSet([{"from": "process:P0_Start", "to": "process:P0_DateDetection", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P1_Start", "to": "process:P1_DateDetection", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P2_Start", "to": "process:P2_FileExtension", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P3_Start", "to": "process:P3_TimelineGeneration", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P4_Start", "to": "process:P4_Histogram", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P5_Start", "to": "process:P5_TimelineGeneration", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P6_Start", "to": "process:P6_TimelineGeneration", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P0_DateDetection", "to": "process:P0_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P1_DateDetection", "to": "process:P1_TimelineGeneration", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P1_TimelineGeneration", "to": "process:P1_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P2_FileExtension", "to": "process:P2_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P3_TimelineGeneration", "to": "process:P3_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P4_Histogram", "to": "process:P4_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P5_TimelineGeneration", "to": "process:P5_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P6_TimelineGeneration", "to": "process:P6_End", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:P0", "to": "process:P0_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:P1", "to": "process:P1_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:P2", "to": "process:P2_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:P3", "to": "process:P3_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:P4", "to": "process:P4_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:P5", "to": "process:P5_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:P6", "to": "process:P6_Start", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}]);
+
+                // Create the network
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+                var options = {
+                    layout: {
+                        hierarchical: {
+                            direction: "LR",
+                            sortMethod: "directed",
+                            nodeSpacing: 150,
+                            levelSeparation: 200
+                        }
+                    },
+                    physics: {
+                        enabled: false
+                    },
+                    edges: {
+                        smooth: {
+                            type: "cubicBezier",
+                            forceDirection: "horizontal"
+                        }
+                    },
+                    interaction: {
+                        hover: true,
+                        tooltipDelay: 200
+                    }
+                };
+
+                var network = new vis.Network(container, data, options);
+
+                // Fit the view once the network is loaded
+                network.once('afterDrawing', function() {
+                    network.fit();
+                });
+
+                // Add tooltips
+                network.on("hoverNode", function(params) {
+                    var nodeId = params.node;
+                    var node = nodes.get(nodeId);
+                    node.title = 'ID: ' + nodeId;
+                    nodes.update(node);
+                });
+
+                // Reset view function
+                function resetView() {
+                    network.fit({
+                        animation: {
+                            duration: 1000,
+                            easingFunction: 'easeInOutQuad'
+                        }
+                    });
+                }
+
+                // Toggle physics function
+                var physicsEnabled = false;
+                function togglePhysics() {
+                    physicsEnabled = !physicsEnabled;
+                    network.setOptions({ physics: { enabled: physicsEnabled } });
+                }
+            </script>
+        </body>
+        </html>
+        

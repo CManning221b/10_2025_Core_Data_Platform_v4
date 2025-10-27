@@ -1,0 +1,542 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Create Process Graph - Visual Editor{% endblock %}
+
+{% block content %}
+<div class="process-editor-container">
+    <div class="header">
+        <h1>Process Graph Editor</h1>
+        <div class="actions">
+            <button id="save-process" class="btn btn-primary">Save Process</button>
+            <a href="{{ url_for('process.process_graphs') }}" class="btn">Cancel</a>
+        </div>
+    </div>
+
+    <div class="editor-panel">
+        <div class="sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Available Methods</h2>
+                </div>
+                <div class="card-content">
+                    <div class="search-box">
+                        <input type="text" id="method-search" placeholder="Search methods..." class="filter-input">
+                    </div>
+                    <div class="method-list">
+                        {% if available_methods %}
+                        <div class="method-categories">
+                            {% for category, methods in available_methods.items() %}
+                            <div class="method-category">
+                                <h3>{{ category }}</h3>
+                                <ul>
+                                    {% for method in methods %}
+                                    <li class="method-item" data-method-id="{{ method.id }}" data-applicable-to="{{ method.applicable_to }}">
+                                        <div class="method-info">
+                                            <span class="method-name">{{ method.name }}</span>
+                                            <span class="method-type">{{ method.type }}</span>
+                                        </div>
+                                        <div class="method-description">{{ method.description }}</div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="no-data-message">
+                            <p>No methods available. Load OWL ontologies with method definitions first.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="editor-workspace">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Process Graph Builder</h2>
+                    <div class="editor-controls">
+                        <input type="text" id="process-name" placeholder="Process Name" class="process-name-input">
+                        <button id="add-start" class="btn btn-sm">Add Start</button>
+                        <button id="add-end" class="btn btn-sm">Add End</button>
+                        <button id="add-decision" class="btn btn-sm">Add Decision</button>
+                        <button id="clear-workspace" class="btn btn-sm btn-danger">Clear</button>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div id="process-canvas" class="process-canvas"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="properties-panel">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Properties</h2>
+                </div>
+                <div class="card-content">
+                    <div id="selected-node-properties">
+                        <p class="no-selection-message">Select a node or edge to view its properties</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Process Modal -->
+<div id="save-modal" class="modal">
+    <div class="modal-content">
+        <h3>Save Process Graph</h3>
+        <div class="form-group">
+            <label for="process-name-modal">Process Name:</label>
+            <input type="text" id="process-name-modal" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="process-description">Description:</label>
+            <textarea id="process-description" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button id="confirm-save" class="btn btn-primary">Save</button>
+            <button id="cancel-save" class="btn">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/process.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/vis-network.min.css') }}">
+<style>
+    /* Process Editor Styles */
+    .process-editor-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .editor-panel {
+        display: grid;
+        grid-template-columns: 300px 1fr 300px;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .sidebar, .properties-panel {
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    .process-canvas {
+        height: 700px;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+    }
+
+    .method-item {
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        cursor: grab;
+        transition: background-color 0.2s;
+    }
+
+    .method-item:hover {
+        background-color: #e0e0e0;
+    }
+
+    .method-info {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 500;
+    }
+
+    .method-type {
+        font-size: 0.8em;
+        color: #666;
+        background-color: #e0e0e0;
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+
+    .method-description {
+        font-size: 0.9em;
+        margin-top: 5px;
+        color: #555;
+    }
+
+    .editor-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .process-name-input {
+        flex-grow: 1;
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .properties-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .properties-table td {
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .properties-table tr td:first-child {
+        font-weight: 500;
+        width: 40%;
+    }
+
+    .no-selection-message {
+        color: #777;
+        text-align: center;
+        font-style: italic;
+        padding: 20px 0;
+    }
+
+    /* Modal styles are reused from ontology.css */
+</style>
+{% endblock %}
+
+{% block additional_js %}
+<script src="{{ url_for('static', filename='vendor/vis-network.min.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize process editor workspace
+        const container = document.getElementById('process-canvas');
+        
+        // Create dummy data for the example
+        const nodes = new vis.DataSet([]);
+        const edges = new vis.DataSet([]);
+        
+        // Create network
+        const data = { nodes, edges };
+        const options = {
+            nodes: {
+                shape: 'box',
+                margin: 10,
+                widthConstraint: {
+                    minimum: 120
+                },
+                font: { face: 'Arial', size: 14 }
+            },
+            edges: {
+                arrows: {
+                    to: { enabled: true, scaleFactor: 1 }
+                },
+                smooth: { type: 'curvedCW', roundness: 0.2 }
+            },
+            physics: {
+                enabled: false
+            },
+            manipulation: {
+                enabled: true,
+                addNode: function(nodeData, callback) {
+                    // Handle node addition
+                    nodeData.label = 'New Node';
+                    callback(nodeData);
+                },
+                addEdge: function(edgeData, callback) {
+                    // Handle edge addition
+                    callback(edgeData);
+                },
+                deleteNode: true,
+                deleteEdge: true
+            }
+        };
+        
+        const network = new vis.Network(container, data, options);
+        
+        // Make method items draggable
+        const methodItems = document.querySelectorAll('.method-item');
+        methodItems.forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    id: this.dataset.methodId,
+                    name: this.querySelector('.method-name').textContent,
+                    type: this.querySelector('.method-type').textContent,
+                    applicableTo: this.dataset.applicableTo
+                }));
+            });
+            
+            item.setAttribute('draggable', true);
+        });
+        
+        // Enable dropping methods_application onto the canvas
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+        
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const methodData = JSON.parse(e.dataTransfer.getData('text/plain'));
+            
+            // Get canvas coordinates for the drop position
+            const canvasRect = container.getBoundingClientRect();
+            const position = network.DOMtoCanvas({
+                x: e.clientX - canvasRect.left,
+                y: e.clientY - canvasRect.top
+            });
+            
+            // Add the method as a node
+            nodes.add({
+                id: `method_${Date.now()}`,
+                label: methodData.name,
+                x: position.x,
+                y: position.y,
+                color: '#33ff57', // Green for methods_application
+                methodId: methodData.id,
+                type: 'method',
+                applicableTo: methodData.applicableTo
+            });
+        });
+        
+        // Add editor control button functionality
+        document.getElementById('add-start').addEventListener('click', function() {
+            nodes.add({
+                id: `start_${Date.now()}`,
+                label: 'Start',
+                shape: 'circle',
+                color: '#3498db', // Blue
+                type: 'start'
+            });
+        });
+        
+        document.getElementById('add-end').addEventListener('click', function() {
+            nodes.add({
+                id: `end_${Date.now()}`,
+                label: 'End',
+                shape: 'circle',
+                color: '#e74c3c', // Red
+                type: 'end'
+            });
+        });
+        
+        document.getElementById('add-decision').addEventListener('click', function() {
+            nodes.add({
+                id: `decision_${Date.now()}`,
+                label: 'Decision',
+                shape: 'diamond',
+                color: '#f39c12', // Orange
+                type: 'decision'
+            });
+        });
+        
+        document.getElementById('clear-workspace').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear the workspace? All unsaved changes will be lost.')) {
+                nodes.clear();
+                edges.clear();
+            }
+        });
+        
+        // Show properties panel on node/edge selection
+        network.on('selectNode', function(params) {
+            const nodeId = params.nodes[0];
+            const node = nodes.get(nodeId);
+            
+            let propertiesHTML = `
+                <table class="properties-table">
+                    <tr>
+                        <td>ID</td>
+                        <td>${node.id}</td>
+                    </tr>
+                    <tr>
+                        <td>Type</td>
+                        <td>${node.type}</td>
+                    </tr>
+                    <tr>
+                        <td>Label</td>
+                        <td><input type="text" value="${node.label}" class="form-control node-label-edit" data-node-id="${node.id}"></td>
+                    </tr>
+            `;
+            
+            if (node.type === 'method') {
+                propertiesHTML += `
+                    <tr>
+                        <td>Method ID</td>
+                        <td>${node.methodId}</td>
+                    </tr>
+                    <tr>
+                        <td>Applicable To</td>
+                        <td>${node.applicableTo}</td>
+                    </tr>
+                `;
+            }
+            
+            if (node.type === 'decision') {
+                propertiesHTML += `
+                    <tr>
+                        <td>Condition</td>
+                        <td><textarea class="form-control node-condition-edit" data-node-id="${node.id}">${node.condition || ''}</textarea></td>
+                    </tr>
+                `;
+            }
+            
+            propertiesHTML += '</table>';
+            
+            document.getElementById('selected-node-properties').innerHTML = propertiesHTML;
+            
+            // Add event listener for label editing
+            const labelEdit = document.querySelector('.node-label-edit');
+            if (labelEdit) {
+                labelEdit.addEventListener('change', function() {
+                    const nodeId = this.dataset.nodeId;
+                    nodes.update({
+                        id: nodeId,
+                        label: this.value
+                    });
+                });
+            }
+            
+            // Add event listener for condition editing
+            const conditionEdit = document.querySelector('.node-condition-edit');
+            if (conditionEdit) {
+                conditionEdit.addEventListener('change', function() {
+                    const nodeId = this.dataset.nodeId;
+                    nodes.update({
+                        id: nodeId,
+                        condition: this.value
+                    });
+                });
+            }
+        });
+        
+        network.on('selectEdge', function(params) {
+            const edgeId = params.edges[0];
+            const edge = edges.get(edgeId);
+            
+            let propertiesHTML = `
+                <table class="properties-table">
+                    <tr>
+                        <td>ID</td>
+                        <td>${edge.id}</td>
+                    </tr>
+                    <tr>
+                        <td>From</td>
+                        <td>${edge.from}</td>
+                    </tr>
+                    <tr>
+                        <td>To</td>
+                        <td>${edge.to}</td>
+                    </tr>
+                    <tr>
+                        <td>Label</td>
+                        <td><input type="text" value="${edge.label || ''}" class="form-control edge-label-edit" data-edge-id="${edge.id}"></td>
+                    </tr>
+                </table>
+            `;
+            
+            document.getElementById('selected-node-properties').innerHTML = propertiesHTML;
+            
+            // Add event listener for label editing
+            const labelEdit = document.querySelector('.edge-label-edit');
+            if (labelEdit) {
+                labelEdit.addEventListener('change', function() {
+                    const edgeId = this.dataset.edgeId;
+                    edges.update({
+                        id: edgeId,
+                        label: this.value
+                    });
+                });
+            }
+        });
+        
+        network.on('deselectNode', function() {
+            document.getElementById('selected-node-properties').innerHTML = '<p class="no-selection-message">Select a node or edge to view its properties</p>';
+        });
+        
+        network.on('deselectEdge', function() {
+            document.getElementById('selected-node-properties').innerHTML = '<p class="no-selection-message">Select a node or edge to view its properties</p>';
+        });
+        
+        // Save process functionality
+        document.getElementById('save-process').addEventListener('click', function() {
+            const processName = document.getElementById('process-name').value;
+            document.getElementById('process-name-modal').value = processName;
+            document.getElementById('save-modal').style.display = 'block';
+        });
+        
+        document.getElementById('cancel-save').addEventListener('click', function() {
+            document.getElementById('save-modal').style.display = 'none';
+        });
+        
+        document.getElementById('confirm-save').addEventListener('click', function() {
+            const processName = document.getElementById('process-name-modal').value;
+            const processDescription = document.getElementById('process-description').value;
+            
+            if (!processName) {
+                alert('Please enter a name for the process');
+                return;
+            }
+            
+            // Get all nodes and edges data
+            const processData = {
+                name: processName,
+                description: processDescription,
+                nodes: nodes.get(),
+                edges: edges.get()
+            };
+            
+            // Send data to backend
+            fetch('{{ url_for("process.save_process") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(processData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Process saved successfully!');
+                    window.location.href = '{{ url_for("process.process_graphs") }}';
+                } else {
+                    alert('Error saving process: ' + data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the process');
+            });
+            
+            document.getElementById('save-modal').style.display = 'none';
+        });
+        
+        // Method search functionality
+        const methodSearch = document.getElementById('method-search');
+        methodSearch.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            const methodItems = document.querySelectorAll('.method-item');
+            
+            methodItems.forEach(item => {
+                const methodName = item.querySelector('.method-name').textContent.toLowerCase();
+                const methodDesc = item.querySelector('.method-description').textContent.toLowerCase();
+                
+                if (methodName.includes(searchText) || methodDesc.includes(searchText)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        // Close modal if clicked outside the content
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('save-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

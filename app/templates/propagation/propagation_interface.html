@@ -1,0 +1,251 @@
+<!-- templates/propagation/propagation_interface.html -->
+{% extends 'base/base.html' %}
+{% block title %}Graph Propagation Interface - {{ graph_id }}{% endblock %}
+
+{% block content %}
+<div class="propagation-interface-container">
+
+    <!-- Top: Graph Visualization -->
+    <div class="graph-panel">
+            <div class="graph-header">
+              <div class="propagation-legend" id="propagation-legend" style="display: none;">
+              </div>
+                <div class="graph-title">
+                    <span class="graph-icon">🕸️</span>
+                    Propagation Visualization
+                </div>
+                <div class="graph-controls">
+                    <button class="graph-control-btn" id="toggle-original" title="Show Original Graph">
+                        <span>ORIG</span>
+                    </button>
+                    <button class="graph-control-btn" id="toggle-propagation" title="Show Propagation Results" disabled>
+                        <span>PROP</span>
+                    </button>
+                    <button class="graph-control-btn" id="fullscreen-graph" title="Fullscreen">
+                        <span>FULL</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="graph-container" id="graph-container">
+                <div class="graph-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading original graph...</div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Results Dashboard -->
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="results-header">
+            <h3>Propagation Results</h3>
+            <div class="results-summary" id="results-summary">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+
+        <div class="results-actions">
+            <button class="results-btn" id="show-propagation-modal">
+                <span class="btn-icon">📊</span>
+                <div class="btn-content">
+                    <div class="btn-title">Propagation Analysis</div>
+                    <div class="btn-subtitle" id="propagation-summary">View detailed results</div>
+                </div>
+            </button>
+
+            <button class="results-btn" id="show-filtered-modal">
+                <span class="btn-icon">🔍</span>
+                <div class="btn-content">
+                    <div class="btn-title">Filtered Results</div>
+                    <div class="btn-subtitle" id="filtered-summary">Nodes in range</div>
+                </div>
+            </button>
+
+            <button class="results-btn" id="show-layout-modal">
+                <span class="btn-icon">📐</span>
+                <div class="btn-content">
+                    <div class="btn-title">Layout Analysis</div>
+                    <div class="btn-subtitle" id="layout-summary">Similarity positioning</div>
+                </div>
+            </button>
+
+            <button class="results-btn" id="export-results">
+                <span class="btn-icon">💾</span>
+                <div class="btn-content">
+                    <div class="btn-title">Export Data</div>
+                    <div class="btn-subtitle">Download JSON</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Interface Split -->
+    <div class="main-interface">
+        <!-- Left Side: Status & Analysis -->
+
+
+        <div class="status-panel">
+            <div class="status-header">
+                <div class="status-title">
+                    <span class="status-icon">📈</span>
+                    Propagation Status
+                </div>
+                <div class="status-indicator" id="status-indicator">
+                    <span class="indicator-dot ready"></span>
+                    Ready
+                </div>
+            </div>
+
+            <div class="status-content" id="status-content">
+                <div class="status-welcome">
+                    <div class="welcome-header">Configure & Run</div>
+                    <p>Set your propagation parameters above and click "Run Propagation" to begin analysis.</p>
+                    <div class="quick-tips">
+                        <h4>Quick Tips:</h4>
+                        <ul>
+                            <li>Choose node types that contain your source property</li>
+                            <li>Use range filtering to focus on specific value ranges</li>
+                            <li>Try different methods for comparison</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Top Configuration Bar -->
+        <div class="config-section">
+            <div class="config-header">
+                <h3>Property Propagation Configuration</h3>
+                <p>Configure and run graph property propagation analysis on <strong>{{ graph_id }}</strong></p>
+            </div>
+
+            <div class="config-form">
+                <div class="config-row">
+                    <div class="config-group">
+                        <label for="source-node-types">Source Node Types</label>
+                        <select id="source-node-types" multiple class="config-select">
+                            <!-- Populated via JavaScript -->
+                        </select>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="graph-direction">Graph Direction</label>
+                        <select id="graph-direction" class="config-select">
+                            <option value="undirected" selected>Bidirectional (Undirected)</option>
+                            <option value="directed">Directional (Directed)</option>
+                        </select>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="source-property">Source Property</label>
+                        <select id="source-property" class="config-select">
+                            <option value="">Select property...</option>
+                            <!-- Populated via JavaScript -->
+                        </select>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="propagation-method">Method</label>
+                        <select id="propagation-method" class="config-select">
+                            <option value="matrix">Matrix Streaming</option>
+                            <option value="spectral">Spectral Propagation</option>
+                        </select>
+                    </div>
+                </div>
+
+<!--                <div class="config-row">-->
+<!--                    <div class="config-group">-->
+<!--                        <label for="edge-types">Edge Types (Optional)</label>-->
+<!--                        <select id="edge-types" multiple class="config-select">-->
+<!--                            <option value="all" selected>All Edge Types</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+=
+                    <div class="config-group">
+                        <label for="exclude-node-types">Exclude Node Types</label>
+                        <select id="exclude-node-types" multiple class="config-select">
+                        </select>
+                        <small style="color: #6c757d;">These node types won't appear in propagation graph</small>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="exclude-edge-types">Exclude Edge Types</label>
+                        <select id="exclude-edge-types" multiple class="config-select">
+                            <!-- Populated via JavaScript -->
+                        </select>
+                        <small style="color: #6c757d;">These edge types won't appear in propagation graph</small>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="range-filter">Value Range Filter</label>
+                        <div class="range-inputs">
+                            <input type="number" id="min-value" placeholder="Min value" class="range-input">
+                            <span class="range-separator">to</span>
+                            <input type="number" id="max-value" placeholder="Max value" class="range-input">
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="layout-type">Layout Type</label>
+                        <select id="layout-type" class="config-select">
+                            <option value="polar">Polar (Value-based)</option>
+                            <option value="force">Force-Directed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="config-actions">
+                    <button id="run-propagation" class="action-btn primary">
+                        <span class="btn-icon">🚀</span>
+                        Run Propagation
+                    </button>
+                    <button id="reset-config" class="action-btn secondary">
+                        <span class="btn-icon">🔄</span>
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <!-- Analysis Modal -->
+    <div id="propagation-analysis-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content loaded via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden data for JavaScript -->
+    <script type="application/json" id="propagation-data">
+    {
+        "graph_id": "{{ graph_id }}",
+        "metadata": {{ metadata|tojson }},
+        "api_endpoints": {
+            "propagate": "{{ url_for('propagation.api_propagate') }}",
+            "filter": "{{ url_for('propagation.api_filter_range') }}",
+            "layout": "{{ url_for('propagation.api_calculate_layout') }}",
+            "subgraph": "{{ url_for('propagation.api_extract_subgraph', graph_id=graph_id) }}",
+            "full_workflow": "{{ url_for('propagation.api_full_workflow') }}",
+            "visualization": "{{ url_for('propagation.api_generate_visualization', graph_id=graph_id) }}"
+        }
+    }
+    </script>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/propagation_interface.css') }}">
+{% endblock %}
+
+{% block additional_js %}
+<script src="{{ url_for('static', filename='js/propagation/propagation_interface.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,47 @@
+<!-- app/templates/instance_graph/instance_graph_list.html -->
+{% extends 'base/base.html' %}
+
+{% block title %}Available Graphs - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="graph-list-container">
+    <h1>Available Graphs</h1>
+
+    {% if graphs %}
+    <div class="graph-list">
+        <table class="graph-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nodes</th>
+                    <th>Edges</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for graph in graphs %}
+                <tr>
+                    <td>{{ graph.id }}</td>
+                    <td>{{ graph.node_count }}</td>
+                    <td>{{ graph.edge_count }}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('instance.view_graph', graph_id=graph.id) }}" class="btn btn-small">View</a>
+                        <a href="{{ url_for('instance.graph_details', graph_id=graph.id) }}" class="btn btn-small">Details</a>
+                        <a href="{{ url_for('instance.visualize_graph', graph_id=graph.id) }}" class="btn btn-small btn-primary">Visualize</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-graphs">
+        <p>No graphs available. <a href="{{ url_for('upload.upload_page') }}">Upload a graph</a> to get started.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/instance_graph.css') }}">
+{% endblock %}

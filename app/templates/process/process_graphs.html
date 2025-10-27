@@ -1,0 +1,161 @@
+
+{% extends 'base/base.html' %}
+
+{% block title %}Process Graphs - Workflow Orchestration{% endblock %}
+
+{% block content %}
+<div class="process-view-container">
+    <div class="header">
+        <h1>Process Graph Management</h1>
+        <div class="actions">
+            <a href="{{ url_for('ontology.loaded_ontology') }}" class="btn btn-primary">View Method Library</a>
+            <a href="{{ url_for('instance.list_graphs') }}" class="btn">View Instance Graphs</a>
+        </div>
+    </div>
+
+    <div class="process-management-panel">
+        <div class="card">
+            <div class="card-header">
+                <h2>Manage Process Graphs</h2>
+            </div>
+            <div class="card-content">
+                <!-- Upload New Process Graph Form -->
+                <div class="upload-section">
+                    <h3>Upload New Process Graph</h3>
+                    <form action="{{ url_for('process.upload_process') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+                        <div class="form-group">
+                            <label for="process_file">Select Process Definition File:</label>
+                            <input type="file" id="process_file" name="process_file" accept=".owl,.ttl,.rdf,.json" required>
+                            <small class="form-help">Supports Turtle (.ttl), RDF/XML (.owl, .rdf) and JSON formats</small>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Upload Process</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Loaded Process Graphs with Delete Options -->
+                <div class="loaded-files-section">
+                    <h3>Loaded Process Graphs</h3>
+                    {% if process_files %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Process Name</th>
+                                <th>Steps</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for process in process_files %}
+                            <tr>
+                                <td>{{ process.name }}</td>
+                                <td>{{ process.step_count }}</td>
+                                <td class="actions-cell">
+                                    <a href="{{ url_for('process.view_process', process_id=process.id) }}" class="btn btn-sm">View</a>
+                                    <form action="{{ url_for('process.delete_process') }}" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this process graph?');">
+                                        <input type="hidden" name="process_id" value="{{ process.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('process.reload_processes') }}" class="btn btn-primary">Reload All Processes</a>
+                        <button id="clear-all-btn" class="btn btn-danger">Clear All Processes</button>
+                    </div>
+
+                    <!-- Confirmation Modal for Clear All -->
+                    <div id="clear-modal" class="modal">
+                        <div class="modal-content">
+                            <h3>Confirm Deletion</h3>
+                            <p>Are you sure you want to delete all process graphs? This action cannot be undone.</p>
+                            <div class="modal-actions">
+                                <form action="{{ url_for('process.clear_processes') }}" method="POST">
+                                    <button type="submit" class="btn btn-danger">Yes, Delete All</button>
+                                </form>
+                                <button id="cancel-clear" class="btn">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-data-message">
+                        <p>No process graphs have been loaded.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/process.css') }}">
+<style>
+    /* Process Graph Management Styles */
+    .process-view-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: 600;
+    }
+
+    .status-completed {
+        background-color: #2ecc71;
+        color: white;
+    }
+
+    .status-running {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .status-failed {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .status-pending {
+        background-color: #f39c12;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal for clear all processes
+        const clearAllBtn = document.getElementById('clear-all-btn');
+        const clearModal = document.getElementById('clear-modal');
+        const cancelClear = document.getElementById('cancel-clear');
+
+        if (clearAllBtn && clearModal && cancelClear) {
+            clearAllBtn.addEventListener('click', function() {
+                clearModal.style.display = 'block';
+            });
+
+            cancelClear.addEventListener('click', function() {
+                clearModal.style.display = 'none';
+            });
+
+            // Close modal if clicked outside the content
+            window.addEventListener('click', function(event) {
+                if (event.target === clearModal) {
+                    clearModal.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    
+            <style>
+            #mynetworkid {
+                width: 100% !important;
+                height: 600px !important;
+                border: 1px solid #ddd;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+            }
+            .vis-network {
+                width: 100% !important;
+                height: 600px !important;
+            }
+            </style>
+            </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "3691", "label": "G11", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 3691\nType: component\nvalue: G11"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "5652", "label": "X11_West_241206_1...", "shape": "dot", "size": 20, "title": "ID: 5652\nType: folder\nvalue: X11_West_241206_145459_LTIT_POST_COND_INSP5.16\nhierarchy_level: 3"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "5090", "label": "S11_West_241130_0...", "shape": "dot", "size": 20, "title": "ID: 5090\nType: folder\nvalue: S11_West_241130_001539_LTIT_POST_COND_INSP5.16\nhierarchy_level: 3"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#706464", "font": {"color": "black"}, "id": "7", "label": "A08", "shape": "dot", "size": 20, "title": "ID: 7\nType: component\nvalue: A08"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#c485d2", "font": {"color": "black"}, "id": "5836", "label": "Channel A08", "shape": "dot", "size": 20, "title": "ID: 5836\nType: channel\nvalue: Channel A08\nhierarchy: reactor\nchannel_id: A08\nreactor_type: CANDU\noriginal_text: A08\npattern: CANDU_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T07:59:57.740219"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "2748", "label": "X11_East_241202_2...", "shape": "dot", "size": 20, "title": "ID: 2748\nType: folder\nvalue: X11_East_241202_224220_LTIT_POST_COND_INSP5.16\nhierarchy_level: 3"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#c485d2", "font": {"color": "black"}, "id": "6222", "label": "Channel G11", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 6222\nType: channel\nvalue: Channel G11\nhierarchy: reactor\nchannel_id: G11\nreactor_type: CANDU\noriginal_text: G11\npattern: CANDU_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T07:59:58.532227"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "1494", "label": "L10_East_241102_1...", "shape": "dot", "size": 20, "title": "ID: 1494\nType: folder\nvalue: L10_East_241102_151921_LTIT_POST_COND_INSP10.13\nhierarchy_level: 3"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#c485d2", "font": {"color": "black"}, "id": "6245", "label": "Channel L11", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 6245\nType: channel\nvalue: Channel L11\nhierarchy: reactor\nchannel_id: L11\nreactor_type: CANDU\noriginal_text: L11\npattern: CANDU_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T07:59:58.588423"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "5091", "label": "S11", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 5091\nType: component\nvalue: S11"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "4223", "label": "L11_West_241115_0...", "shape": "dot", "size": 20, "title": "ID: 4223\nType: folder\nvalue: L11_West_241115_002528_LTIT_POST_COND_INSP5.16\nhierarchy_level: 3"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "3690", "label": "G11_West_241029_0...", "shape": "dot", "size": 20, "title": "ID: 3690\nType: folder\nvalue: G11_West_241029_051125_LTIT_POST_COND_INSP10.00\nhierarchy_level: 3"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "4219", "label": "L10_West_241115_0...", "shape": "dot", "size": 20, "title": "ID: 4219\nType: folder\nvalue: L10_West_241115_024638_LTIT_POST_COND_INSP5.16\nhierarchy_level: 3"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#c485d2", "font": {"color": "black"}, "id": "6182", "label": "Channel X11", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 6182\nType: channel\nvalue: Channel X11\nhierarchy: reactor\nchannel_id: X11\nreactor_type: CANDU\noriginal_text: X11\npattern: CANDU_PATTERN\nconfidence: 0.95\ncreated: 2025-08-18T07:59:58.446051"}, {"borderWidth": 2, "borderWidthSelected": 4, "color": "#856464", "font": {"color": "black"}, "id": "5096", "label": "S11_West_241211_0...", "shape": "dot", "size": 20, "title": "ID: 5096\nType: folder\nvalue: S11_West_241211_023748_LTIT_POST_COND_INSP7.31\nhierarchy_level: 3"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "1495", "label": "L10", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 1495\nType: component\nvalue: L10"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#d764b3", "font": {"color": "black"}, "id": "5835", "label": "ChannelDetectionM...", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 5835\nType: ChannelDetectionMethod\nvalue: ChannelDetectionMethod execution (CANDU reactor)\nhierarchy: analysis\nmethod_type: ChannelDetectionMethod\nreactor_type: CANDU\nexecution_time: 2025-08-18T07:59:57.739217\nmethod_id: ChannelDetectionMethod\nmethod_name: Ontology-Driven Channel ID Detection"}, {"borderWidth": 4, "borderWidthSelected": 6, "color": "#706464", "font": {"color": "black"}, "id": "4224", "label": "L11", "shape": "dot", "size": 30, "title": "SEARCH MATCH\nID: 4224\nType: component\nvalue: L11"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#999999", "from": "5835", "label": "uses", "title": "Edge: 5835_4224\nType: uses\nFrom: 5835\nTo: 4224\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T07:59:58.588423", "to": "4224", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "produces", "title": "Edge: 5835_6245\nType: produces\nFrom: 5835\nTo: 6245\nedge_type: produces\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: channel\nprovenance_type: generated_by\ncreated: 2025-08-18T07:59:58.588423", "to": "6245", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "produces", "title": "Edge: 5835_6182\nType: produces\nFrom: 5835\nTo: 6182\nedge_type: produces\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: channel\nprovenance_type: generated_by\ncreated: 2025-08-18T07:59:58.446051", "to": "6182", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "uses", "title": "Edge: 5835_3691\nType: uses\nFrom: 5835\nTo: 3691\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T07:59:58.532227", "to": "3691", "width": 2}, {"arrows": "to", "color": "#999999", "from": "3690", "label": "has_channel", "title": "Edge: 3690_6222\nType: has_channel\nFrom: 3690\nTo: 6222\nedge_type: has_channel\ndirection: out\nsource_type: folder\ntarget_type: channel\nprovenance_type: contains_channel_reference\ncreated: 2025-08-18T07:59:58.533227", "to": "6222", "width": 2}, {"arrows": "to", "color": "#999999", "from": "3690", "label": "has_component", "title": "Edge: 3690_3691\nType: has_component\nFrom: 3690\nTo: 3691\nedge_type: has_component\ndirection: out\nsource_type: folder\ntarget_type: component", "to": "3691", "width": 2}, {"arrows": "to", "color": "#999999", "from": "4223", "label": "has_channel", "title": "Edge: 4223_6245\nType: has_channel\nFrom: 4223\nTo: 6245\nedge_type: has_channel\ndirection: out\nsource_type: folder\ntarget_type: channel\nprovenance_type: contains_channel_reference\ncreated: 2025-08-18T07:59:58.589427", "to": "6245", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5096", "label": "has_component", "title": "Edge: 5096_5091\nType: has_component\nFrom: 5096\nTo: 5091\nedge_type: has_component\ndirection: out\nsource_type: folder\ntarget_type: component", "to": "5091", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "uses", "title": "Edge: 5835_7\nType: uses\nFrom: 5835\nTo: 7\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T07:59:57.741216", "to": "7", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "produces", "title": "Edge: 5835_6222\nType: produces\nFrom: 5835\nTo: 6222\nedge_type: produces\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: channel\nprovenance_type: generated_by\ncreated: 2025-08-18T07:59:58.532227", "to": "6222", "width": 2}, {"arrows": "to", "color": "#999999", "from": "4219", "label": "has_component", "title": "Edge: 4219_1495\nType: has_component\nFrom: 4219\nTo: 1495\nedge_type: has_component\ndirection: out\nsource_type: folder\ntarget_type: component", "to": "1495", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5652", "label": "has_channel", "title": "Edge: 5652_6182\nType: has_channel\nFrom: 5652\nTo: 6182\nedge_type: has_channel\ndirection: out\nsource_type: folder\ntarget_type: channel\nprovenance_type: contains_channel_reference\ncreated: 2025-08-18T07:59:58.447076", "to": "6182", "width": 2}, {"arrows": "to", "color": "#999999", "from": "1494", "label": "has_component", "title": "Edge: 1494_1495\nType: has_component\nFrom: 1494\nTo: 1495\nedge_type: has_component\ndirection: out\nsource_type: folder\ntarget_type: component", "to": "1495", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5090", "label": "has_component", "title": "Edge: 5090_5091\nType: has_component\nFrom: 5090\nTo: 5091\nedge_type: has_component\ndirection: out\nsource_type: folder\ntarget_type: component", "to": "5091", "width": 2}, {"arrows": "to", "color": "#999999", "from": "2748", "label": "has_channel", "title": "Edge: 2748_6182\nType: has_channel\nFrom: 2748\nTo: 6182\nedge_type: has_channel\ndirection: out\nsource_type: folder\ntarget_type: channel\nprovenance_type: contains_channel_reference\ncreated: 2025-08-18T07:59:58.447076", "to": "6182", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "uses", "title": "Edge: 5835_5091\nType: uses\nFrom: 5835\nTo: 5091\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T07:59:58.675805", "to": "5091", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "produces", "title": "Edge: 5835_5836\nType: produces\nFrom: 5835\nTo: 5836\nedge_type: produces\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: channel\nprovenance_type: generated_by\ncreated: 2025-08-18T07:59:57.741216", "to": "5836", "width": 2}, {"arrows": "to", "color": "#999999", "from": "4223", "label": "has_component", "title": "Edge: 4223_4224\nType: has_component\nFrom: 4223\nTo: 4224\nedge_type: has_component\ndirection: out\nsource_type: folder\ntarget_type: component", "to": "4224", "width": 2}, {"arrows": "to", "color": "#999999", "from": "5835", "label": "uses", "title": "Edge: 5835_1495\nType: uses\nFrom: 5835\nTo: 1495\nedge_type: uses\ndirection: out\nsource_type: ChannelDetectionMethod\ntarget_type: component\nprovenance_type: derived_from\ncreated: 2025-08-18T07:59:58.030867", "to": "1495", "width": 2}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"enabled": true, "stabilization": {"iterations": 150}, "barnesHut": {"gravitationalConstant": -8000, "centralGravity": 0.3, "springLength": 95, "springConstant": 0.04, "damping": 0.09}}, "edges": {"arrows": {"to": {"enabled": true, "scaleFactor": 0.8}}, "smooth": {"enabled": true, "type": "continuous"}, "font": {"size": 10}}, "nodes": {"font": {"size": 12}, "borderWidth": 2, "shadow": true}, "layout": {"improvedLayout": true}, "interaction": {"dragNodes": true, "dragView": true, "zoomView": true}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

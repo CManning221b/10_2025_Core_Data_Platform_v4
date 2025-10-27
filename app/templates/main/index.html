@@ -1,0 +1,86 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+
+Home - Graph Analysis Toolkit
+
+{% endblock %}
+
+{% block content %}
+
+<div class="home-container"> <div class="hero"> <h1>Graph Analysis Toolkit</h1> <p class="tagline">A research-oriented platform for uploading, inspecting, and exploring graph-structured data</p> <div class="hero-actions"> <a href="{{ url_for('upload.upload_page') }}" class="btn btn-primary">Begin</a> <a href="{{ url_for('main.about') }}" class="btn">Project Overview</a> </div> </div>
+
+<div class="features">
+    <div class="feature-card">
+        <div class="icon">📤</div>
+        <h2>Import</h2>
+        <p>Load graph data from CSV, JSON, or folder structures to begin structural analysis.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="icon">📊</div>
+        <h2>Visualize</h2>
+        <p>Generate flexible and interactive graph views to help interpret structure and flow.</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="icon">🔍</div>
+        <h2>Analyze</h2>
+        <p>Examine network properties, centralities, and clustering to derive quantitative insight.</p>
+    </div>
+</div>
+
+<div class="workflow">
+    <h2>Workflow Overview</h2>
+    <div class="workflow-steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <h3>Import Data</h3>
+                <p>Bring in data from local files or JSON input. Supports typical graph formats.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <h3>Inspect Graph</h3>
+                <p>Review nodes, edges, and summary statistics including degree distributions.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <h3>Visualize</h3>
+                <p>Explore dynamic layouts and highlight specific patterns or anomalies.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <h3>Analyze Structure</h3>
+                <p>Run structural metrics and extract meaningful patterns from graph topology.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="getting-started">
+    <h2>Getting Started</h2>
+    <div class="getting-started-content">
+        <ol>
+            <li>Load your data via the <a href="{{ url_for('upload.upload_page') }}">import page</a></li>
+            <li>Use the graph summary view to explore structure and statistics</li>
+            <li>Visualize your network with layout and styling options</li>
+            <li>Analyze and interpret structural patterns for your research</li>
+        </ol>
+        <div class="cta">
+            <a href="{{ url_for('upload.upload_page') }}" class="btn btn-primary">Begin</a>
+        </div>
+    </div>
+</div>
+</div> {% endblock %}
+{% block additional_css %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+{% endblock %}

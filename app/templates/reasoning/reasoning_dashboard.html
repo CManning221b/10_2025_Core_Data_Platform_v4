@@ -1,0 +1,366 @@
+{% extends 'base/base.html' %}
+{% block title %}Reasoning Dashboard - Graph Reasoning System{% endblock %}
+{% block content %}
+<div class="reasoning-dashboard">
+    <h1>Graph Reasoning Dashboard</h1>
+<div class="dashboard-summary">
+    <p>
+        This dashboard allows you to analyze instance graphs using ontology comparison,
+        identify applicable methods based on class matching, and find processes that use these methods.
+    </p>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Instance Graphs Panel -->
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h2>Available Instance Graphs</h2>
+            <div class="panel-actions">
+                <a href="{{ url_for('instance.list_graphs') }}" class="btn btn-small">View All Graphs</a>
+            </div>
+        </div>
+
+        <div class="panel-content">
+            {% if instance_graphs %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nodes</th>
+                        <th>Edges</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for graph in instance_graphs %}
+                    <tr>
+                        <td>{{ graph.id }}</td>
+                        <td>{{ graph.node_count }}</td>
+                        <td>{{ graph.edge_count }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('reasoning.analyze_instance', graph_id=graph.id) }}" class="btn btn-small btn-primary">Analyze</a>
+                            <a href="{{ url_for('instance.view_graph', graph_id=graph.id) }}" class="btn btn-small">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data-message">
+                <p>No instance graphs available. <a href="{{ url_for('upload.upload_page') }}">Upload a graph</a> to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Methods Panel -->
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h2>Available Methods</h2>
+            <div class="panel-actions">
+                <a href="{{ url_for('ontology.loaded_ontology') }}" class="btn btn-small">View OWL Ontology</a>
+            </div>
+        </div>
+
+        <div class="panel-content">
+            {% if methods %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Method Name</th>
+                        <th>Applies To</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for method in methods %}
+                    <tr>
+                        <td class="method-name">{{ method.name }}</td>
+                        <td>
+                            {% if method.appliesTo %}
+                            <ul class="applies-to-list">
+                                {% for class_name in method.appliesTo %}
+                                <li>{{ class_name }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <span class="no-methods">Not specified</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ method.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data-message">
+                <p>No methods available. <a href="{{ url_for('ontology.loaded_ontology') }}">Load an OWL ontology</a> with method definitions.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Processes Panel -->
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h2>Available Processes</h2>
+            <div class="panel-actions">
+                <a href="{{ url_for('process.process_graphs') }}" class="btn btn-small">View All Processes</a>
+            </div>
+        </div>
+
+        <div class="panel-content">
+            {% if processes %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Process Name</th>
+                        <th>Steps</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for process in processes %}
+                    <tr>
+                        <td>{{ process.name }}</td>
+                        <td>{{ process.step_count }}</td>
+                        <td>{{ process.description }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('process.view_process', process_id=process.id) }}" class="btn btn-small">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data-message">
+                <p>No processes available. <a href="{{ url_for('process.process_graphs') }}">Upload a process</a> definition.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="reasoning-workflow">
+    <h2>Reasoning Workflow</h2>
+    <div class="workflow-steps">
+        <div class="workflow-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <h3>Analyze Instance Graph</h3>
+                <p>Select an instance graph to analyze. The system will extract an inferred ontology from the graph.</p>
+            </div>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <h3>Compare Ontologies</h3>
+                <p>The inferred ontology is compared with the loaded OWL ontology to find matching classes.</p>
+            </div>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <h3>Identify Methods</h3>
+                <p>Methods that apply to the matching classes are identified from the OWL ontology.</p>
+            </div>
+        </div>
+        <div class="workflow-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <h3>Find Processes</h3>
+                <p>Processes that use the identified methods are discovered and can be executed on the graph.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block additional_css %}
+<style>
+    /* Dashboard layout */
+    .reasoning-dashboard {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .dashboard-summary {
+        background: #f8f8f8;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    /* Panel styles */
+    .dashboard-panel {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 15px;
+        background: #f0f0f0;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+
+    .panel-content {
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    /* Table styles */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th, .data-table td {
+        padding: 8px 10px;
+        border: 1px solid #eee;
+        text-align: left;
+    }
+
+    .data-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+
+    .data-table tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+
+    .actions {
+        white-space: nowrap;
+    }
+
+    /* Method styling */
+    .method-name {
+        color: #e67e22;
+        font-weight: bold;
+    }
+
+    .applies-to-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .applies-to-list li {
+        display: inline-block;
+        background: #e8f4f8;
+        border-radius: 4px;
+        padding: 2px 6px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        font-size: 0.9em;
+    }
+
+    .no-methods {
+        color: #999;
+        font-style: italic;
+    }
+
+    /* Workflow section */
+    .reasoning-workflow {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .workflow-steps {
+        margin-top: 15px;
+    }
+
+    .workflow-step {
+        display: flex;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .workflow-step:not(:last-child):after {
+        content: '';
+        position: absolute;
+        left: 25px;
+        top: 50px;
+        bottom: -15px;
+        width: 2px;
+        background: #ddd;
+    }
+
+    .step-number {
+        background: #3498db;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-content {
+        padding-top: 5px;
+    }
+
+    .step-content h3 {
+        margin: 0 0 5px 0;
+        font-size: 1.1rem;
+    }
+
+    .step-content p {
+        margin: 0;
+        color: #666;
+    }
+
+    /* Message when no data is available */
+    .no-data-message {
+        padding: 15px;
+        text-align: center;
+        color: #666;
+    }
+
+    .no-data-message a {
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    .no-data-message a:hover {
+        text-decoration: underline;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

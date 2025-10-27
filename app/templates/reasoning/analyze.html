@@ -1,0 +1,294 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Analyze Instance Graph - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="analysis-container">
+    <div class="header">
+        <h1>Analyze: {{ instance_graph.name }}</h1>
+        <div class="actions">
+            <a href="{{ url_for('reasoning.reasoning_dashboard') }}" class="btn">Back to Dashboard</a>
+            <a href="{{ url_for('instance.view_graph', graph_id=instance_graph.id) }}" class="btn">View Graph</a>
+        </div>
+    </div>
+
+    <div class="instance-details">
+        <div class="card">
+            <div class="card-header">
+                <h2>Instance Graph Details</h2>
+            </div>
+            <div class="card-content">
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ instance_graph.node_count }}</div>
+                        <div class="stat-label">Nodes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ instance_graph.edge_count }}</div>
+                        <div class="stat-label">Edges</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ inferred_types|length }}</div>
+                        <div class="stat-label">Inferred Types</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="inferred-types">
+        <h2>Inferred Types</h2>
+        <div class="card">
+            <div class="card-content">
+                {% if inferred_types %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Node ID</th>
+                            <th>Inferred Type</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for node_id, type_info in inferred_types.items() %}
+                        <tr>
+                            <td>{{ node_id }}</td>
+                            <td>{{ type_info.type }}</td>
+                            <td>{{ type_info.confidence|round(2) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No types could be inferred for this instance graph.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="applicable-methods">
+        <h2>Applicable Methods</h2>
+        <div class="card">
+            <div class="card-content">
+                {% if applicable_methods %}
+                <div class="methods-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Applies To</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for method in applicable_methods %}
+                            <tr>
+                                <td>{{ method.name }}</td>
+                                <td>{{ method.description }}</td>
+                                <td>{{ method.appliesTo|join(', ') }}</td>
+                                <td>
+                                    <button class="btn btn-primary execute-method" data-method-id="{{ method.id }}" data-graph-id="{{ instance_graph.id }}">Execute</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No applicable methods found for the inferred types.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="matching-processes">
+        <h2>Matching Processes</h2>
+        <div class="card">
+            <div class="card-content">
+                {% if matching_processes %}
+                <div class="processes-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Process</th>
+                                <th>Description</th>
+                                <th>Steps</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for process in matching_processes %}
+                            <tr>
+                                <td>{{ process.name }}</td>
+                                <td>{{ process.description }}</td>
+                                <td>{{ process.step_count }}</td>
+                                <td>
+                                    <a href="{{ url_for('process.view_process', process_id=process.id) }}" class="btn">View</a>
+                                    <button class="btn btn-primary execute-process" data-process-id="{{ process.id }}" data-graph-id="{{ instance_graph.id }}">Execute</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="no-data-message">
+                    <p>No matching processes found for the applicable methods.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Execution Result</h3>
+            <div id="resultContent">
+                <pre></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reasoning.css') }}">
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    #resultContent pre {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal functionality
+        var modal = document.getElementById('resultModal');
+        var span = document.getElementsByClassName("close")[0];
+        var resultContent = document.getElementById('resultContent').querySelector('pre');
+        
+        // Close modal when clicking X
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        // Execute method buttons
+        document.querySelectorAll('.execute-method').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var methodId = this.getAttribute('data-method-id');
+                var graphId = this.getAttribute('data-graph-id');
+                
+                // Execute method via AJAX
+                fetch('{{ url_for("reasoning.execute_method") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'method_id': methodId,
+                        'graph_id': graphId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resultContent.textContent = JSON.stringify(data, null, 2);
+                    modal.style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultContent.textContent = "Error: " + error;
+                    modal.style.display = "block";
+                });
+            });
+        });
+        
+        // Execute process buttons
+        document.querySelectorAll('.execute-process').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var processId = this.getAttribute('data-process-id');
+                var graphId = this.getAttribute('data-graph-id');
+                
+                // Execute process via AJAX
+                fetch('{{ url_for("reasoning.execute_process") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'process_id': processId,
+                        'graph_id': graphId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resultContent.textContent = JSON.stringify(data, null, 2);
+                    modal.style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultContent.textContent = "Error: " + error;
+                    modal.style.display = "block";
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

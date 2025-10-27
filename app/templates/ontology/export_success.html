@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Ontology Export Successful{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2>Ontology Export Successful</h2>
+        </div>
+        <div class="card-body">
+            <p>Your ontology has been successfully exported to OWL format.</p>
+            
+            <h3>Export Details:</h3>
+            <ul>
+                <li><strong>File:</strong> {{ result.ontology_file }}</li>
+                <li><strong>Format:</strong> {{ result.format }}</li>
+                <li><strong>Timestamp:</strong> {{ result.timestamp }}</li>
+            </ul>
+            
+            <h3>Ontology Statistics:</h3>
+            <ul>
+                <li><strong>Node Types:</strong> {{ result.stats.node_types }}</li>
+                <li><strong>Edge Types:</strong> {{ result.stats.edge_types }}</li>
+                <li><strong>Relationships:</strong> {{ result.stats.relationships }}</li>
+            </ul>
+            
+            <div class="mt-4">
+                <a href="{{ download_url }}" class="btn btn-primary" download>Download OWL File</a>
+                <a href="{{ url_for('ontology.extract_ontology', graph_id=graph_id) }}" class="btn btn-secondary">Back to Ontology View</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

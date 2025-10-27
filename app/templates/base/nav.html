@@ -1,0 +1,200 @@
+<!-- app/templates/base/nav.html with Reasoning dropdown added -->
+<nav class="main-nav">
+    <div class="logo">
+        <a href="{{ url_for('main.index') }}">
+            <i class="fas fa-project-diagram"></i>
+            <span class="logo-text">Graph Analysis Tool</span>
+        </a>
+    </div>
+    <div class="nav-links">
+        <!-- Primary Navigation -->
+        <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.endpoint == 'main.index' else '' }}">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="{{ url_for('upload.upload_page') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('upload.') else '' }}">
+            <i class="fas fa-upload"></i> Upload
+        </a>
+        <a href="{{ url_for('instance.list_graphs') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('instance.') else '' }}">
+            <i class="fas fa-project-diagram"></i> Graphs
+        </a>
+
+        <!-- Ontology Dropdown -->
+        <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint and request.endpoint.startswith('ontology.extract') else '' }}">
+                <i class="fas fa-sitemap"></i> Ontology
+            </a>
+            <div class="dropdown-content">
+                {% if graph_id is defined %}
+                <a href="{{ url_for('ontology.extract_ontology', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint and request.endpoint.startswith('ontology.extract') else '' }}">
+                    <i class="fas fa-sitemap"></i> Ontology Analysis
+                </a>
+                {% else %}
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-sitemap"></i> Ontology Analysis
+                </a>
+                {% endif %}
+                {% if graph_id is defined %}
+                <a href="{{ url_for('ontology.compare_ontologies', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint and request.endpoint == 'ontology.compare_ontologies' else '' }}">
+                    <i class="fas fa-balance-scale"></i> Compare Ontologies
+                </a>
+                {% else %}
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-balance-scale"></i> Compare Ontologies
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- OWL Dropdown -->
+        <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint == 'ontology.loaded_ontology' else '' }}">
+                <i class="fas fa-book"></i> OWL
+            </a>
+            <div class="dropdown-content">
+                <a href="{{ url_for('ontology.loaded_ontology') }}"
+                   class="{{ 'active' if request.endpoint and request.endpoint == 'ontology.loaded_ontology' else '' }}">
+                    <i class="fas fa-book"></i> OWL Ontologies
+                </a>
+            </div>
+        </div>
+
+        <!-- Process Dropdown -->
+        <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint and request.endpoint.startswith('process.') else '' }}">
+                <i class="fas fa-tasks"></i> Process
+            </a>
+            <div class="dropdown-content">
+                <a href="{{ url_for('process.process_graphs') }}"
+                   class="{{ 'active' if request.endpoint == 'process.process_graphs' else '' }}">
+                    <i class="fas fa-list"></i> Process Graphs
+                </a>
+
+                <!-- Optional: If you want examples to show when available -->
+                {% if process_files and process_files|length > 0 %}
+                <a href="{{ url_for('process.view_process', process_id=process_files[0].id) }}"
+                   class="{{ 'active' if request.endpoint == 'process.view_process' else '' }}">
+                    <i class="fas fa-eye"></i> View Process Example
+                </a>
+                <a href="{{ url_for('process.view_process_file', filename=process_files[0].id) }}"
+                   class="{{ 'active' if request.endpoint == 'process.view_process_file' else '' }}">
+                    <i class="fas fa-file-code"></i> View Process File Example
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reasoning Dropdown -->
+        <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint and request.endpoint.startswith('reasoning.') else '' }}">
+                <i class="fas fa-brain"></i> Reasoning
+            </a>
+            <div class="dropdown-content">
+                <a href="{{ url_for('reasoning.reasoning_dashboard') }}"
+                   class="{{ 'active' if request.endpoint == 'reasoning.reasoning_dashboard' else '' }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                {% if graph_id is defined %}
+                <a href="{{ url_for('reasoning.analyze_instance', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'reasoning.analyze_instance' else '' }}">
+                    <i class="fas fa-microscope"></i> Analyze Current Graph
+                </a>
+                {% else %}
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-microscope"></i> Select Graph to Analyze
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+       <!-- Visualisation Dropdown -->
+        <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint and request.endpoint.startswith('visualisation.') else '' }}">
+                <i class="fas fa-chart-line"></i> Visualisation
+            </a>
+            <div class="dropdown-content">
+                {% if graph_id is defined %}
+                <a href="{{ url_for('visualisation.timeline', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'visualisation.timeline' else '' }}">
+                    <i class="fas fa-clock"></i> Timeline Analysis
+                </a>
+                <a href="{{ url_for('visualisation.core_plot', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'visualisation.core_plot' else '' }}">
+                    <i class="fas fa-th"></i> Core Plot
+                </a>
+                <a href="{{ url_for('visualisation.histogram', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'visualisation.histogram' else '' }}">
+                    <i class="fas fa-chart-bar"></i> Histogram
+                </a>
+                <a href="{{ url_for('visualisation.similarity', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'visualisation.similarity' else '' }}">
+                    <i class="fas fa-project-diagram"></i> Similarity Analysis
+                </a>
+                {% else %}
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-clock"></i> Timeline Analysis
+                </a>
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-th"></i> Channel Grid
+                </a>
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-chart-bar"></i> Histogram
+                </a>
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-project-diagram"></i> Similarity Analysis
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+         <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint and request.endpoint.startswith('propagation.') else '' }}">
+                <i class="fas fa-wave-square"></i> Propagation
+            </a>
+            <div class="dropdown-content">
+                {% if graph_id is defined %}
+                <a href="{{ url_for('propagation.propagation_interface', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'propagation.propagation_interface' else '' }}">
+                    <i class="fas fa-broadcast-tower"></i> Property Propagation
+                </a>
+                <a href="{{ url_for('propagation.api_debug_graph', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'propagation.api_debug_graph' else '' }}">
+                    <i class="fas fa-bug"></i> Debug Graph Structure
+                </a>
+                {% else %}
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-broadcast-tower"></i> Select Graph for Propagation
+                </a>
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-bug"></i> Debug Graph Structure
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- CLI Interface Dropdown -->
+        <div class="dropdown">
+            <a href="#" class="dropbtn {{ 'active' if request.endpoint and request.endpoint.startswith('text_interface.') else '' }}">
+                <i class="fas fa-terminal"></i> CLI
+            </a>
+            <div class="dropdown-content">
+                {% if graph_id is defined %}
+                <a href="{{ url_for('text_interface.cli_interface', graph_id=graph_id) }}"
+                   class="{{ 'active' if request.endpoint == 'text_interface.cli_interface' else '' }}">
+                    <i class="fas fa-terminal"></i> Graph Explorer
+                </a>
+                {% else %}
+                <a href="{{ url_for('instance.list_graphs') }}">
+                    <i class="fas fa-terminal"></i> Select Graph for CLI
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- About Link -->
+        <a href="{{ url_for('main.about') }}" class="{{ 'active' if request.endpoint == 'main.about' else '' }}">
+            <i class="fas fa-info-circle"></i> About
+        </a>
+    </div>
+</nav>

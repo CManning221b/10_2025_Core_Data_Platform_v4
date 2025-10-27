@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"font": {"color": "black", "size": 12}, "group": "folder", "id": "folder", "label": "folder", "shape": "dot", "size": 25, "title": "value: folder |type: folder |hierarchy: NodeType |count: 9 |percentage_of_graph: 10.465116279069768 |property_count: 3 |properties: [\u0027hierarchy_level\u0027, \u0027type\u0027, \u0027value\u0027] |property_statistics: {\u0027hierarchy_level\u0027: {\u0027type\u0027: \u0027int\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 55.55555555555556, \u0027pattern_type\u0027: \u0027integer\u0027, \u0027value_range\u0027: {\u0027min\u0027: 0.0, \u0027max\u0027: 4.0, \u0027avg\u0027: 2.7777777777777777, \u0027median\u0027: 3.0}}, \u0027type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 11.11111111111111, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 6, \u0027max\u0027: 6, \u0027avg\u0027: 6.0}, \u0027enum_values\u0027: [\u0027folder\u0027]}, \u0027value\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 77.77777777777779, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 3, \u0027max\u0027: 46, \u0027avg\u0027: 16.333333333333332}, \u0027enum_values\u0027: [\u0027A08_East_241210_212256_LTIT_POST_COND_INSP5.16\u0027, \u0027Training\u0027, \u0027East\u0027, \u0027A08_East_241005_025910_LTIT_POST_COND_INSP5.00\u0027, \u0027video\u0027, \u0027E:\\\\\u0027, \u0027stitched_images\u0027]}} |structural_role: {\u0027avg_outgoing_edges\u0027: 6.222222222222222, \u0027avg_incoming_edges\u0027: 0.8888888888888888, \u0027connectivity_ratio\u0027: 7.111111111111111} |hierarchical_position: {\u0027leaf_percentage\u0027: 0.0, \u0027root_percentage\u0027: 11.11111111111111, \u0027intermediate_percentage\u0027: 88.88888888888889} | "}, {"font": {"color": "black", "size": 12}, "group": "component", "id": "component", "label": "component", "shape": "dot", "size": 25, "title": "value: component |type: component |hierarchy: NodeType |count: 39 |percentage_of_graph: 45.348837209302324 |property_count: 3 |properties: [\u0027hierarchy_level\u0027, \u0027type\u0027, \u0027value\u0027] |property_statistics: {\u0027hierarchy_level\u0027: {\u0027type\u0027: \u0027NoneType\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 2.564102564102564, \u0027pattern_type\u0027: \u0027unknown\u0027}, \u0027type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 2.564102564102564, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 9, \u0027max\u0027: 9, \u0027avg\u0027: 9.0}, \u0027enum_values\u0027: [\u0027component\u0027]}, \u0027value\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027string\u0027, \u0027length_range\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 11, \u0027avg\u0027: 4.230769230769231}}} |structural_role: {\u0027avg_outgoing_edges\u0027: 0.0, \u0027avg_incoming_edges\u0027: 2.4615384615384617, \u0027connectivity_ratio\u0027: 2.4615384615384617} |hierarchical_position: {\u0027leaf_percentage\u0027: 100.0, \u0027root_percentage\u0027: 0.0, \u0027intermediate_percentage\u0027: 0.0} | "}, {"font": {"color": "black", "size": 12}, "group": "file", "id": "file", "label": "file", "shape": "dot", "size": 25, "title": "value: file |type: file |hierarchy: NodeType |count: 21 |percentage_of_graph: 24.418604651162788 |property_count: 3 |properties: [\u0027hierarchy_level\u0027, \u0027type\u0027, \u0027value\u0027] |property_statistics: {\u0027hierarchy_level\u0027: {\u0027type\u0027: \u0027int\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 4.761904761904762, \u0027pattern_type\u0027: \u0027integer\u0027, \u0027value_range\u0027: {\u0027min\u0027: 5.0, \u0027max\u0027: 5.0, \u0027avg\u0027: 5.0, \u0027median\u0027: 5.0}}, \u0027type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 4.761904761904762, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 4, \u0027max\u0027: 4, \u0027avg\u0027: 4.0}, \u0027enum_values\u0027: [\u0027file\u0027]}, \u0027value\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027string\u0027, \u0027length_range\u0027: {\u0027min\u0027: 75, \u0027max\u0027: 118, \u0027avg\u0027: 102.0952380952381}}} |structural_role: {\u0027avg_outgoing_edges\u0027: 1.5714285714285714, \u0027avg_incoming_edges\u0027: 1.0, \u0027connectivity_ratio\u0027: 2.5714285714285716} |hierarchical_position: {\u0027leaf_percentage\u0027: 0.0, \u0027root_percentage\u0027: 0.0, \u0027intermediate_percentage\u0027: 100.0} | "}, {"font": {"color": "black", "size": 12}, "group": "filename", "id": "filename", "label": "filename", "shape": "dot", "size": 25, "title": "value: filename |type: filename |hierarchy: NodeType |count: 12 |percentage_of_graph: 13.953488372093023 |property_count: 3 |properties: [\u0027hierarchy_level\u0027, \u0027type\u0027, \u0027value\u0027] |property_statistics: {\u0027hierarchy_level\u0027: {\u0027type\u0027: \u0027int\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 8.333333333333332, \u0027pattern_type\u0027: \u0027integer\u0027, \u0027value_range\u0027: {\u0027min\u0027: 6.0, \u0027max\u0027: 6.0, \u0027avg\u0027: 6.0, \u0027median\u0027: 6.0}}, \u0027type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 8.333333333333332, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 8, \u0027max\u0027: 8, \u0027avg\u0027: 8.0}, \u0027enum_values\u0027: [\u0027filename\u0027]}, \u0027value\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027string\u0027, \u0027length_range\u0027: {\u0027min\u0027: 3, \u0027max\u0027: 49, \u0027avg\u0027: 27.75}}} |structural_role: {\u0027avg_outgoing_edges\u0027: 5.75, \u0027avg_incoming_edges\u0027: 1.0, \u0027connectivity_ratio\u0027: 6.75} |hierarchical_position: {\u0027leaf_percentage\u0027: 0.0, \u0027root_percentage\u0027: 0.0, \u0027intermediate_percentage\u0027: 100.0} | "}, {"font": {"color": "black", "size": 12}, "group": "extension", "id": "extension", "label": "extension", "shape": "dot", "size": 25, "title": "value: extension |type: extension |hierarchy: NodeType |count: 5 |percentage_of_graph: 5.813953488372093 |property_count: 3 |properties: [\u0027hierarchy_level\u0027, \u0027type\u0027, \u0027value\u0027] |property_statistics: {\u0027hierarchy_level\u0027: {\u0027type\u0027: \u0027NoneType\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 20.0, \u0027pattern_type\u0027: \u0027unknown\u0027}, \u0027type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 20.0, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 9, \u0027max\u0027: 9, \u0027avg\u0027: 9.0}, \u0027enum_values\u0027: [\u0027extension\u0027]}, \u0027value\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027unique_value_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027, \u0027length_range\u0027: {\u0027min\u0027: 4, \u0027max\u0027: 5, \u0027avg\u0027: 4.4}, \u0027enum_values\u0027: [\u0027.pdf\u0027, \u0027.pptx\u0027, \u0027.json\u0027, \u0027.mp4\u0027, \u0027.png\u0027]}} |structural_role: {\u0027avg_outgoing_edges\u0027: 0.0, \u0027avg_incoming_edges\u0027: 4.2, \u0027connectivity_ratio\u0027: 4.2} |hierarchical_position: {\u0027leaf_percentage\u0027: 100.0, \u0027root_percentage\u0027: 0.0, \u0027intermediate_percentage\u0027: 0.0} | "}, {"font": {"color": "black", "size": 12}, "group": "Metadata", "id": "OntologyMeta", "label": "Ontology Schema Metadata", "shape": "dot", "size": 25, "title": "value: Ontology Schema Metadata |type: Metadata |hierarchy: OntologyElement |node_type_count: 5 |edge_type_count: 4 |relationship_pattern_count: 6 |total_nodes_in_source: 86 |total_edges_in_source: 158 |extraction_timestamp: 2025-05-27T16:14:50.174300 | "}]);
+                  edges = new vis.DataSet([{"arrowStrikethrough": false, "arrows": "to", "color": "#FBBC05", "font": {"align": "middle", "size": 10}, "from": "folder", "label": "has_component", "smooth": {"enabled": true, "type": "dynamic"}, "title": "edge_type: has_component |direction: forward |source_type: folder |target_type: component |count: 27 |percentage_of_type: 28.125 |cardinality: {\u0027type\u0027: \u0027many-to-many\u0027, \u0027description\u0027: \u0027A folder may connect to multiple components, and a component may connect to multiple folders\u0027, \u0027outgoing\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 9, \u0027median\u0027: 1, \u0027sources_with_multiple_targets\u0027: 4}, \u0027incoming\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 3, \u0027median\u0027: 2, \u0027targets_with_multiple_sources\u0027: 9}, \u0027constraints\u0027: {\u0027source_coverage\u0027: 100.0, \u0027target_coverage\u0027: 43.58974358974359, \u0027edge_density\u0027: 7.6923076923076925}} |property_statistics: {\u0027edge_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027source_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027target_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027direction\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}} | ", "to": "component"}, {"arrowStrikethrough": false, "arrows": "to", "color": "#34A853", "font": {"align": "middle", "size": 10}, "from": "folder", "label": "contains", "smooth": {"enabled": true, "type": "dynamic"}, "title": "edge_type: contains |direction: forward |source_type: folder |target_type: folder |count: 8 |percentage_of_type: 27.586206896551722 |cardinality: {\u0027type\u0027: \u0027many-to-one\u0027, \u0027description\u0027: \u0027A folder may connect to multiple folders, but each folder connects to at most one folder\u0027, \u0027outgoing\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 2, \u0027median\u0027: 2, \u0027sources_with_multiple_targets\u0027: 3}, \u0027incoming\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 1, \u0027median\u0027: 1.0, \u0027targets_with_multiple_sources\u0027: 0}, \u0027constraints\u0027: {\u0027source_coverage\u0027: 55.55555555555556, \u0027target_coverage\u0027: 88.88888888888889, \u0027edge_density\u0027: 9.876543209876543}} |property_statistics: {\u0027edge_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027source_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027target_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027direction\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}} | ", "to": "folder"}, {"arrowStrikethrough": false, "arrows": "to", "color": "#34A853", "font": {"align": "middle", "size": 10}, "from": "folder", "label": "contains", "smooth": {"enabled": true, "type": "dynamic"}, "title": "edge_type: contains |direction: forward |source_type: folder |target_type: file |count: 21 |percentage_of_type: 72.41379310344827 |cardinality: {\u0027type\u0027: \u0027many-to-one\u0027, \u0027description\u0027: \u0027A folder may connect to multiple files, but each file connects to at most one folder\u0027, \u0027outgoing\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 12, \u0027median\u0027: 1.5, \u0027sources_with_multiple_targets\u0027: 3}, \u0027incoming\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 1, \u0027median\u0027: 1, \u0027targets_with_multiple_sources\u0027: 0}, \u0027constraints\u0027: {\u0027source_coverage\u0027: 66.66666666666666, \u0027target_coverage\u0027: 100.0, \u0027edge_density\u0027: 11.11111111111111}} |property_statistics: {\u0027edge_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027source_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027target_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027direction\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}} | ", "to": "file"}, {"arrowStrikethrough": false, "arrows": "to", "color": "#4285F4", "font": {"align": "middle", "size": 10}, "from": "file", "label": "has_name", "smooth": {"enabled": true, "type": "dynamic"}, "title": "edge_type: has_name |direction: forward |source_type: file |target_type: filename |count: 12 |percentage_of_type: 100.0 |cardinality: {\u0027type\u0027: \u0027one-to-one\u0027, \u0027description\u0027: \u0027Each file connects to at most one filename, and each filename connects to at most one file\u0027, \u0027outgoing\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 1, \u0027median\u0027: 1.0, \u0027sources_with_multiple_targets\u0027: 0}, \u0027incoming\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 1, \u0027median\u0027: 1.0, \u0027targets_with_multiple_sources\u0027: 0}, \u0027constraints\u0027: {\u0027source_coverage\u0027: 57.14285714285714, \u0027target_coverage\u0027: 100.0, \u0027edge_density\u0027: 4.761904761904762}} |property_statistics: {\u0027edge_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027source_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027target_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027direction\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}} | ", "to": "filename"}, {"arrowStrikethrough": false, "arrows": "to", "color": "#FBBC05", "font": {"align": "middle", "size": 10}, "from": "filename", "label": "has_component", "smooth": {"enabled": true, "type": "dynamic"}, "title": "edge_type: has_component |direction: forward |source_type: filename |target_type: component |count: 69 |percentage_of_type: 71.875 |cardinality: {\u0027type\u0027: \u0027many-to-many\u0027, \u0027description\u0027: \u0027A filename may connect to multiple components, and a component may connect to multiple filenames\u0027, \u0027outgoing\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 11, \u0027median\u0027: 3.0, \u0027sources_with_multiple_targets\u0027: 9}, \u0027incoming\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 5, \u0027median\u0027: 2.5, \u0027targets_with_multiple_sources\u0027: 12}, \u0027constraints\u0027: {\u0027source_coverage\u0027: 100.0, \u0027target_coverage\u0027: 61.53846153846154, \u0027edge_density\u0027: 14.743589743589745}} |property_statistics: {\u0027edge_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027source_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027target_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027direction\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}} | ", "to": "component"}, {"arrowStrikethrough": false, "arrows": "to", "color": "#EA4335", "font": {"align": "middle", "size": 10}, "from": "file", "label": "has_extension", "smooth": {"enabled": true, "type": "dynamic"}, "title": "edge_type: has_extension |direction: forward |source_type: file |target_type: extension |count: 21 |percentage_of_type: 100.0 |cardinality: {\u0027type\u0027: \u0027one-to-many\u0027, \u0027description\u0027: \u0027Each file connects to at most one extension, but a extension may connect to multiple files\u0027, \u0027outgoing\u0027: {\u0027min\u0027: 1, \u0027max\u0027: 1, \u0027median\u0027: 1, \u0027sources_with_multiple_targets\u0027: 0}, \u0027incoming\u0027: {\u0027min\u0027: 2, \u0027max\u0027: 5, \u0027median\u0027: 5, \u0027targets_with_multiple_sources\u0027: 5}, \u0027constraints\u0027: {\u0027source_coverage\u0027: 100.0, \u0027target_coverage\u0027: 100.0, \u0027edge_density\u0027: 20.0}} |property_statistics: {\u0027edge_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027source_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027target_type\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}, \u0027direction\u0027: {\u0027type\u0027: \u0027str\u0027, \u0027occurrence_percentage\u0027: 100.0, \u0027pattern_type\u0027: \u0027enumeration\u0027}} | ", "to": "extension"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"nodes": {"borderWidth": 2, "borderWidthSelected": 4, "shape": "dot", "font": {"face": "Arial", "size": 12}, "scaling": {"label": {"enabled": true, "min": 12, "max": 24}}}, "edges": {"color": {"inherit": false}, "smooth": {"type": "dynamic", "forceDirection": "none", "roundness": 0.5}, "font": {"face": "Arial", "size": 10}}, "physics": {"stabilization": {"iterations": 200}, "barnesHut": {"springConstant": 0.01, "avoidOverlap": 0.5}}, "interaction": {"hover": true, "tooltipDelay": 200, "hideEdgesOnDrag": false, "navigationButtons": true, "multiselect": true, "zoomView": true}, "layout": {"improvedLayout": true}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

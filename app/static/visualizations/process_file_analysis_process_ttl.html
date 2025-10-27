@@ -1,0 +1,193 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>File Analysis Process</title>
+            <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                }
+
+                h1, h2 {
+                    color: #333;
+                }
+
+                #visualization {
+                    width: 100%;
+                    height: 700px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+
+                .info-panel {
+                    background: #f8f8f8;
+                    padding: 15px;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                }
+
+                .legend {
+                    display: flex;
+                    flex-wrap: wrap;
+                    margin-bottom: 15px;
+                }
+
+                .legend-item {
+                    display: flex;
+                    align-items: center;
+                    margin-right: 20px;
+                    margin-bottom: 10px;
+                }
+
+                .legend-color {
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 5px;
+                    border: 1px solid #ccc;
+                }
+
+                .dashed-line {
+                    width: 30px;
+                    height: 0;
+                    border-top: 2px dashed #FFD700;
+                    margin-right: 5px;
+                }
+
+                .controls {
+                    margin-bottom: 15px;
+                }
+
+                button {
+                    padding: 6px 12px;
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin-right: 10px;
+                }
+
+                button:hover {
+                    background: #2980b9;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>File Analysis Process</h1>
+
+            <div class="info-panel">
+                <p><strong>File:</strong> file_analysis_process.ttl</p>
+                <p><strong>Description:</strong> Process extracted from OWL/TTL file</p>
+                <p><strong>Steps:</strong> 17</p>
+            </div>
+
+            <div class="controls">
+                <button onclick="resetView()">Reset View</button>
+                <button onclick="togglePhysics()">Toggle Physics</button>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#FFD700; transform: rotate(45deg);"></div>
+                    <span>Process</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#3498db; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+                    <span>Start Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#e74c3c; border-radius: 0;"></div>
+                    <span>End Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#2ecc71;"></div>
+                    <span>Method Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#9b59b6; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div>
+                    <span>Subprocess Step</span>
+                </div>
+                <div class="legend-item">
+                    <div class="dashed-line"></div>
+                    <span>Process Start</span>
+                </div>
+            </div>
+
+            <div id="visualization"></div>
+
+            <script type="text/javascript">
+                // Initialize vis.js network
+                var container = document.getElementById('visualization');
+
+                // Create nodes and edges datasets
+                var nodes = new vis.DataSet([{"id": "process:ExtensionHistogramProcess", "label": "ExtensionHistogramProcess", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:TimeSeriesAnalysisProcess", "label": "TimeSeriesAnalysisProcess", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:DatasetAnalysisProcess", "label": "DatasetAnalysisProcess", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:ComprehensiveDatasetScanProcess", "label": "ComprehensiveDatasetScanProcess", "color": "#FFD700", "shape": "diamond", "font": {"size": 14, "face": "Arial"}, "size": 25}, {"id": "process:ExtHistStart", "label": "ExtHistStart", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:TimeSeriesStart", "label": "TimeSeriesStart", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:DatasetStart", "label": "DatasetStart", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:CompScanStart", "label": "CompScanStart", "color": "#3498db", "shape": "triangle", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:ExtHistEnd", "label": "ExtHistEnd", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:TimeSeriesEnd", "label": "TimeSeriesEnd", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:DatasetEnd", "label": "DatasetEnd", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:CompScanEnd", "label": "CompScanEnd", "color": "#e74c3c", "shape": "square", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:ExtractExtensionsStep", "label": "ExtractExtensionsStep", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:GenerateExtHistogramStep", "label": "GenerateExtHistogramStep", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:DateDetectionStep", "label": "DateDetectionStep", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:TimelineGenerationStep", "label": "TimelineGenerationStep", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:ChannelDetectionStep", "label": "ChannelDetectionStep", "color": "#2ecc71", "shape": "dot", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:RunExtensionHistogramSubprocess", "label": "RunExtensionHistogramSubprocess", "color": "#9b59b6", "shape": "hexagon", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:RunTimeSeriesSubprocess", "label": "RunTimeSeriesSubprocess", "color": "#9b59b6", "shape": "hexagon", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:AnalyzeCurrentDatasetStep", "label": "AnalyzeCurrentDatasetStep", "color": "#9b59b6", "shape": "hexagon", "font": {"size": 14, "face": "Arial"}, "size": 20}, {"id": "process:ProcessSubfoldersStep", "label": "ProcessSubfoldersStep", "color": "#9b59b6", "shape": "hexagon", "font": {"size": 14, "face": "Arial"}, "size": 20}]);
+                var edges = new vis.DataSet([{"from": "process:ExtHistStart", "to": "process:ExtractExtensionsStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:TimeSeriesStart", "to": "process:DateDetectionStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:DatasetStart", "to": "process:RunExtensionHistogramSubprocess", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:CompScanStart", "to": "process:AnalyzeCurrentDatasetStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:ExtractExtensionsStep", "to": "process:GenerateExtHistogramStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:GenerateExtHistogramStep", "to": "process:ExtHistEnd", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:DateDetectionStep", "to": "process:TimelineGenerationStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:TimelineGenerationStep", "to": "process:TimeSeriesEnd", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:ChannelDetectionStep", "to": "process:DatasetEnd", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:RunExtensionHistogramSubprocess", "to": "process:RunTimeSeriesSubprocess", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:RunTimeSeriesSubprocess", "to": "process:ChannelDetectionStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:AnalyzeCurrentDatasetStep", "to": "process:ProcessSubfoldersStep", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:ProcessSubfoldersStep", "to": "process:CompScanEnd", "arrows": "to", "label": "nextStep", "color": "#666666", "width": 2, "smooth": {"type": "curvedCW", "roundness": 0.2}}, {"from": "process:ExtensionHistogramProcess", "to": "process:ExtHistStart", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:TimeSeriesAnalysisProcess", "to": "process:TimeSeriesStart", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:DatasetAnalysisProcess", "to": "process:DatasetStart", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}, {"from": "process:ComprehensiveDatasetScanProcess", "to": "process:CompScanStart", "arrows": "to", "label": "startsAt", "color": "#FFD700", "dashes": true, "width": 2}]);
+
+                // Create the network
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+
+                var options = {
+                    layout: {
+                        hierarchical: {
+                            direction: "LR",
+                            sortMethod: "directed",
+                            nodeSpacing: 150,
+                            levelSeparation: 200
+                        }
+                    },
+                    physics: {
+                        enabled: false
+                    },
+                    edges: {
+                        smooth: {
+                            type: "cubicBezier",
+                            forceDirection: "horizontal"
+                        }
+                    },
+                    interaction: {
+                        hover: true,
+                        tooltipDelay: 200
+                    }
+                };
+
+                var network = new vis.Network(container, data, options);
+
+                // Fit the view once the network is loaded
+                network.once('afterDrawing', function() {
+                    network.fit();
+                });
+
+                // Add tooltips
+                network.on("hoverNode", function(params) {
+                    var nodeId = params.node;
+                    var node = nodes.get(nodeId);
+                    node.title = 'ID: ' + nodeId;
+                    nodes.update(node);
+                });
+
+                // Reset view function
+                function resetView() {
+                    network.fit({
+                        animation: {
+                            duration: 1000,
+                            easingFunction: 'easeInOutQuad'
+                        }
+                    });
+                }
+
+                // Toggle physics function
+                var physicsEnabled = false;
+                function togglePhysics() {
+                    physicsEnabled = !physicsEnabled;
+                    network.setOptions({ physics: { enabled: physicsEnabled } });
+                }
+            </script>
+        </body>
+        </html>
+        

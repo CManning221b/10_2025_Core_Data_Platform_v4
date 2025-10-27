@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Upload Status - Graph Visualization System{% endblock %}
+
+{% block content %}
+<div class="status-container">
+    <h1>Data Processing Status</h1>
+    
+    <div class="status-card {% if success %}success{% else %}error{% endif %}">
+        <div class="status-header">
+            <h2>{{ status_title }}</h2>
+            <div class="status-icon">
+                {% if success %}
+                <i class="fa fa-check-circle"></i>
+                {% else %}
+                <i class="fa fa-exclamation-circle"></i>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="status-body">
+            <p class="status-message">{{ status_message }}</p>
+            
+            {% if details %}
+            <div class="status-details">
+                <h3>Processing Details</h3>
+                <table class="details-table">
+                    <tbody>
+                        {% for key, value in details.items() %}
+                        <tr>
+                            <th>{{ key }}</th>
+                            <td>{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            
+            {% if graph_stats %}
+            <div class="graph-stats">
+                <h3>Graph Statistics</h3>
+                <ul class="stats-list">
+                    <li><strong>Node Count:</strong> {{ graph_stats.node_count }}</li>
+                    <li><strong>Edge Count:</strong> {{ graph_stats.edge_count }}</li>
+                    {% if graph_stats.graph_id %}
+                    <li><strong>Graph ID:</strong> {{ graph_stats.graph_id }}</li>
+                    {% endif %}
+                    {% if graph_stats.original_source %}
+                    <li><strong>Source:</strong> {{ graph_stats.original_source }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% if errors %}
+            <div class="error-details">
+                <h3>Error Details</h3>
+                <ul class="error-list">
+                    {% for error in errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="status-footer">
+            {% if success and graph_stats.graph_id %}
+            <a href="{{ url_for('instance.view_graph', graph_id=graph_stats.graph_id) }}" class="btn btn-primary">View Graph</a>
+            {% else %}
+            <a href="{{ url_for('upload.upload_page') }}" class="btn btn-secondary">Return to Upload</a>
+            {% endif %}
+
+            <a href="{{ url_for('main.index') }}" class="btn">Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/upload_status.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

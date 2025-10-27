@@ -1,0 +1,242 @@
+/* app/static/css/ontology.css */
+.ontology-view-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.ontology-summary {
+    margin-bottom: 2rem;
+}
+
+.summary-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    flex: 1;
+    background-color: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.visualization-tabs {
+    margin-top: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.tab-header {
+    display: flex;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.tab-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.tab-btn.active {
+    background-color: #fff;
+    border-bottom: 3px solid #333;
+}
+
+.tab-content {
+    padding: 1rem;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.visualization-container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+.visualization-container iframe {
+    border: none;
+    width: 100%;
+    height: 100%;
+}
+
+.type-list, .relationship-list {
+    margin-top: 1rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.data-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.btn-small {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* Property lists */
+.property-list {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.property-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+.property-name {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.property-details {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .summary-stats {
+        flex-direction: column;
+    }
+
+    .tab-header {
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        flex: 1 0 50%;
+        text-align: center;
+    }
+}
+
+/* Added styles for loaded ontology and comparison */
+.loaded-files {
+    margin-bottom: 2rem;
+}
+
+.ontology-file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ontology-file-list li {
+    background: #f5f5f5;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+.visualization-comparison,
+.differences-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 1rem;
+}
+
+.visualization-column,
+.difference-column {
+    flex: 1;
+}
+
+.difference-column {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.difference-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.difference-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.matching-class {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.method-class {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+.fuzzy-matching {
+    color: #f39c12;  /* Orange color for fuzzy matches */
+    font-weight: bold;
+}

@@ -1,0 +1,44 @@
+{
+  "status_fields": [
+    {
+      "field": "is_valid",
+      "type": "boolean",
+      "true_status": "PASSED",
+      "false_status": "FAILED"
+    },
+    {
+      "field": "has_error",
+      "type": "boolean",
+      "true_status": "FAILED",
+      "false_status": null
+    },
+    {
+      "field": "has_warning",
+      "type": "boolean",
+      "true_status": "WARNING",
+      "false_status": null
+    },
+    {
+      "field": "status",
+      "type": "string",
+      "mappings": {
+        "PASSED": "PASSED",
+        "PASS": "PASSED",
+        "SUCCESS": "PASSED",
+        "FAILED": "FAILED",
+        "FAIL": "FAILED",
+        "ERROR": "FAILED",
+        "WARNING": "WARNING",
+        "WARN": "WARNING"
+      }
+    },
+    {
+      "field": "validation_passed",
+      "type": "boolean",
+      "true_status": "PASSED",
+      "false_status": null
+    }
+  ],
+  "failure_keywords": ["anachronism", "violation", "error", "failed", "invalid"],
+  "default_status": "INFORMATIONAL"
+}

@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+{% block title %}Graph CLI Interface - Graph Reasoning System{% endblock %}
+
+{% block content %}
+<div class="cli-interface-container">
+    <!-- Top Search Bar -->
+    <div class="search-section">
+        <div class="search-container">
+            <input type="text" 
+                   id="nl-search" 
+                   class="search-input" 
+                   placeholder="Ask anything about your graph... (e.g., 'What measurements were taken?', 'Show me validation results')"
+                   autocomplete="off">
+            <button id="search-btn" class="search-button">
+                <span class="search-icon">Search</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Interface Split -->
+    <div class="main-interface">
+        <!-- Method Analysis Dashboard -->
+        <div class="method-dashboard">
+            <div class="dashboard-header">
+                <h3>Method Analysis Dashboard</h3>
+                <p>Explore your executed methods and their results</p>
+            </div>
+
+            <div class="dashboard-buttons">
+                <button class="dashboard-btn primary" id="show-methods-modal">
+                    <span class="btn-icon">EXEC</span>
+                    <div class="btn-content">
+                        <div class="btn-title">Method Executions</div>
+                        <div class="btn-subtitle">{{ method_executions|length }} methods run</div>
+                    </div>
+                </button>
+
+                <button class="dashboard-btn warning" id="show-warnings-modal">
+                    <span class="btn-icon">WARN</span>
+                    <div class="btn-content">
+                        <div class="btn-title">Warnings & Issues</div>
+                        <div class="btn-subtitle">Check validation results</div>
+                    </div>
+                </button>
+
+                <button class="dashboard-btn info" id="show-insights-modal">
+                    <span class="btn-icon">INFO</span>
+                    <div class="btn-content">
+                        <div class="btn-title">Key Insights</div>
+                        <div class="btn-subtitle">Data quality summary</div>
+                    </div>
+                </button>
+
+                <button class="dashboard-btn secondary" id="show-recommendations-modal">
+                    <span class="btn-icon">REC</span>
+                    <div class="btn-content">
+                        <div class="btn-title">Recommendations</div>
+                        <div class="btn-subtitle">Suggested next steps</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Left Side: Output Display (NO INPUT) -->
+        <div class="cli-panel">
+            <div class="cli-header">
+                <div class="cli-title">
+                    <span class="terminal-icon">OUTPUT</span>
+                    Output Display
+                </div>
+                <div class="cli-status">
+                    <span class="status-indicator active"></span>
+                    Connected to Graph: {{ graph_id }}
+                </div>
+            </div>
+
+            <div class="cli-output" id="cli-output">
+                <!-- STARTS EMPTY NOW -->
+                <div class="output-welcome">
+                    <div class="welcome-header">Ready to Explore</div>
+                    <p>Use the dashboard buttons above or the search bar to explore your graph data.</p>
+                    <p>Results will appear here.</p>
+                </div>
+            </div>
+
+            <!-- REMOVED: CLI input section completely -->
+        </div>
+
+        <!-- Right Side: Graph Visualization -->
+        <div class="graph-panel">
+            <div class="graph-header">
+                <div class="graph-title">
+                    <span class="graph-icon">GRAPH</span>
+                    Interactive Graph View
+                </div>
+                <div class="graph-controls">
+                    <button class="graph-control-btn" id="reset-view" title="Reset View">
+                        <span>RESET</span>
+                    </button>
+                    <button class="graph-control-btn" id="fullscreen-graph" title="Fullscreen">
+                        <span>FULL</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="graph-container" id="graph-container">
+                <!-- PyVis graph will be loaded here -->
+                <div class="graph-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Loading graph visualization...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Method Analysis Modal -->
+    <div id="method-analysis-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+                <span class="close"></span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content loaded via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden data for JavaScript -->
+<script type="application/json" id="graph-data">
+{
+    "graph_id": "{{ graph_id }}",
+    "loaded_ontology": "{{ loaded_ontology_name }}",
+    "reasoning_analysis": {{ reasoning_analysis_serializable|tojson if reasoning_analysis_serializable else '{}' }},
+    "api_endpoints": {
+        "cli_command": "{{ url_for('text_interface.process_command') }}",
+        "nl_search": "{{ url_for('text_interface.natural_language_search') }}",
+        "graph_data": "{{ url_for('text_interface.get_graph_data', graph_id=graph_id) }}",
+        "method_analysis": "{{ url_for('text_interface.get_method_analysis_api') }}"
+    }
+}
+</script>
+</div>
+{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cli_interface.css') }}">
+{% endblock %}
+
+{% block additional_js %}
+<script src="{{ url_for('static', filename='js/text_interface/button_interface.js') }}"></script>
+{% endblock %}

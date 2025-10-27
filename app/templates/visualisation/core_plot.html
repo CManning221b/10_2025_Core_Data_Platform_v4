@@ -1,0 +1,271 @@
+{% extends "base/base.html" %}
+
+{% block title %}Core Plot Visualization - {{ reactor_info.type_display }}{% endblock %}
+
+{% block content %}
+
+<!-- Add CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/visualisation.css') }}">
+
+<!-- Load JavaScript files -->
+<script src="{{ url_for('static', filename='js/visualisation/channel_button.js') }}"></script>
+<script src="{{ url_for('static', filename='js/visualisation/core_plot.js') }}"></script>
+
+<div class="core-plot-container">
+    <div class="reactor-header">
+        <h2>{{ title }}</h2>
+
+        {% if reactor_info.type != 'Unknown' %}
+        <div class="reactor-info-panel">
+            <div class="reactor-type-badge reactor-{{ reactor_info.type|lower }}">
+                <i class="fas fa-atom"></i>
+                {{ reactor_info.type_display }}
+            </div>
+
+            <div class="reactor-details">
+                <div class="detail-item">
+                    <span class="detail-label">Grid Size:</span>
+                    <span class="detail-value">{{ reactor_info.grid_width }} × {{ reactor_info.grid_height }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Positions:</span>
+                    <span class="detail-value">{{ reactor_info.total_positions }}</span>
+                </div>
+                {% if reactor_info.confidence > 0 %}
+                <div class="detail-item">
+                    <span class="detail-label">Detection Confidence:</span>
+                    <span class="detail-value confidence-{{ 'high' if reactor_info.confidence > 0.8 else 'medium' if reactor_info.confidence > 0.5 else 'low' }}">
+                        {{ "%.1f%%" | format(reactor_info.confidence * 100) }}
+                    </span>
+                </div>
+                {% endif %}
+                {% if reactor_info.excluded_channels %}
+                <div class="detail-item">
+                    <span class="detail-label">Excluded Positions:</span>
+                    <span class="detail-value">{{ reactor_info.excluded_channels|length }} positions</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="reactor-info-panel reactor-unknown">
+            <div class="reactor-type-badge reactor-unknown">
+                <i class="fas fa-question-circle"></i>
+                Unknown Reactor Type
+            </div>
+            <p class="unknown-message">No reactor type could be determined from the channel patterns in this graph.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="plot-controls">
+        <div class="plot-stats">
+            <span class="stat-item">Total Channels: <span id="total-channels">0</span></span>
+            <span class="stat-item">Active Channels: <span id="active-channels">0</span></span>
+            <span class="stat-item">With Measurements: <span id="measured-channels">0</span></span>
+            {% if reactor_info.type != 'Unknown' %}
+            <span class="stat-item">Grid Coverage: <span id="grid-coverage">0%</span></span>
+            {% endif %}
+        </div>
+
+        <div class="plot-legend">
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #cccccc;"></span>
+                <span>Not in graph</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #ffdd44;"></span>
+                <span>No measurements</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #44ff44;"></span>
+                <span>Has measurements</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color" style="background-color: #4488ff;"></span>
+                <span>Rich temporal data</span>
+            </div>
+            {% if reactor_info.excluded_channels %}
+            <div class="legend-item">
+                <span class="legend-color excluded-position"></span>
+                <span>Excluded position</span>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if reactor_info.type != 'Unknown' %}
+        <div class="reactor-pattern-info">
+            <details>
+                <summary>Channel Pattern Details</summary>
+                <div class="pattern-details">
+                    <div class="pattern-item">
+                        <strong>Pattern:</strong> <code>{{ reactor_info.regex_pattern }}</code>
+                    </div>
+                    {% if reactor_info.channel_rule != 'default' %}
+                    <div class="pattern-item">
+                        <strong>Rule:</strong> {{ reactor_info.channel_rule.replace('_', ' ').title() }}
+                    </div>
+                    {% endif %}
+                    {% if reactor_info.excluded_channels %}
+                    <div class="pattern-item">
+                        <strong>Excluded:</strong> {{ reactor_info.excluded_channels|join(', ') }}
+                    </div>
+                    {% endif %}
+                </div>
+            </details>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="grid-container" class="grid-container-{{ reactor_info.type|lower }}"></div>
+
+    <div class="navigation-links">
+        <a href="{{ url_for('visualisation.timeline', graph_id=graph_id) }}" class="btn btn-primary">View Timeline</a>
+        <a href="{{ url_for('instance.view_graph', graph_id=graph_id) }}" class="btn btn-secondary">Back to Graph</a>
+        <a href="{{ url_for('instance.list_graphs') }}" class="btn btn-secondary">All Graphs</a>
+        {% if reactor_info.type != 'Unknown' %}
+        <button id="export-grid" class="btn btn-info">Export Grid Data</button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const channelData = {{ channel_data|tojson|safe }};
+    const reactorInfo = {{ reactor_info|tojson|safe }};
+    const reactorConfig = {{ reactor_config|tojson|safe }};
+
+    console.log('Channel data:', channelData);
+    console.log('Reactor info:', reactorInfo);
+
+    // Anonymize the exclusions to match the renamed channels
+    // A01 → 0101, B02 → 0202, etc.
+    function anonymizeChannelName(name) {
+        if (name.length >= 3 && /^[A-Z]/.test(name)) {
+            const letterPos = name.charCodeAt(0) - 65 + 1;
+            const numbers = name.slice(1);
+            return String(letterPos).padStart(2, '0') + numbers;
+        }
+        return name;
+    }
+    // FIXED: Use hardcoded CANDU exclusions for circular pattern (backend isn't providing the right ones)
+    const canduExclusions = [
+        'A01', 'A02', 'A03', 'A04', 'A05', 'A06', 'A07',
+        'A18', 'A19', 'A20', 'A21', 'A22', 'A23', 'A24',
+        'B01', 'B02', 'B03', 'B04', 'B05',
+        'B20', 'B21', 'B22', 'B23', 'B24',
+        'C01', 'C02', 'C03', 'C04',
+        'C21', 'C22', 'C23', 'C24',
+        'D01', 'D02', 'D03',
+        'D21', 'D22', 'D23', 'D24',
+        'E01', 'E02',
+        'E23', 'E24',
+        'F01','F24',
+        'G01','G24',
+        'H01','H24',
+        'R01', 'R24',
+        'S01', 'S24',
+        'T01', 'T24',
+        'U01', 'U02',
+        'U23', 'U24',
+        'V01', 'V02', 'V03',
+        'V22', 'V23', 'V24',
+        'W01', 'W02', 'W03', 'W04',
+        'W21', 'W22', 'W23', 'W24',
+        'X01', 'X02', 'X03', 'X04', 'X05',
+        'X20', 'X21', 'X22', 'X23', 'X24',
+        'Y01', 'Y02', 'Y03', 'Y04', 'Y05', 'Y06', 'Y07',
+        'Y18', 'Y19', 'Y20', 'Y21', 'Y22', 'Y23', 'Y24'
+    ].map(e => anonymizeChannelName(e));
+
+    // Choose exclusions based on reactor type
+    const exclusions = reactorInfo.type === 'CANDU' ? canduExclusions : [];
+
+    console.log(`Creating grid for ${reactorInfo.type} with ${exclusions.length} exclusions`);
+    console.log('Anonymized exclusions:', exclusions);
+
+    let corePlot = new CorePlot(24, 'grid-container', exclusions, channelData, {
+        reactorType: reactorInfo.type,
+        gridHeight: 25
+    });
+    corePlot.createGrid();
+
+    // Update stats
+    const channels = Object.keys(channelData || {});
+    const totalChannels = channels.length;
+    const activeChannels = Object.values(channelData || {}).filter(c => c.status === 'active').length;
+    const measuredChannels = Object.values(channelData || {}).filter(c => c.measurement_count > 0).length;
+
+    document.getElementById('total-channels').textContent = totalChannels;
+    document.getElementById('active-channels').textContent = activeChannels;
+    document.getElementById('measured-channels').textContent = measuredChannels;
+
+    // Calculate coverage
+    if (reactorInfo.type !== 'Unknown') {
+        const totalPositions = reactorInfo.type === 'CANDU' ?
+            (24 * 25) - exclusions.length : // CANDU with exclusions
+            8; // AGR has 8 channels
+        const coverage = totalPositions > 0 ? (totalChannels / totalPositions * 100).toFixed(1) : 0;
+        const coverageElement = document.getElementById('grid-coverage');
+        if (coverageElement) {
+            coverageElement.textContent = coverage + '%';
+        }
+    }
+
+    // Export functionality
+    const exportButton = document.getElementById('export-grid');
+    if (exportButton) {
+        exportButton.addEventListener('click', function() {
+            const exportData = {
+                reactor_type: reactorInfo.type,
+                total_channels: totalChannels,
+                active_channels: activeChannels,
+                measured_channels: measuredChannels,
+                detection_confidence: reactorInfo.confidence,
+                channels: channelData,
+                timestamp: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `core_plot_${reactorInfo.type}_${graph_id}_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
+});
+</script>
+
+<style>
+/* All your reactor info styling */
+.reactor-header { margin-bottom: 2rem; }
+.reactor-info-panel { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 1.5rem; margin: 1rem 0; border-left: 4px solid #007bff; }
+.reactor-info-panel.reactor-unknown { border-left-color: #6c757d; }
+.reactor-type-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 25px; font-weight: bold; margin-bottom: 1rem; font-size: 1.1em; }
+.reactor-type-badge.reactor-candu { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; }
+.reactor-type-badge.reactor-agr { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; }
+.reactor-type-badge.reactor-unknown { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; }
+.reactor-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.detail-item { display: flex; justify-content: space-between; align-items: center; }
+.detail-label { font-weight: 600; color: #495057; }
+.detail-value { font-weight: bold; color: #212529; }
+.confidence-high { color: #28a745; }
+.confidence-medium { color: #ffc107; }
+.confidence-low { color: #dc3545; }
+.unknown-message { color: #6c757d; font-style: italic; margin: 0; }
+.reactor-pattern-info { margin-top: 1rem; background: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; }
+.reactor-pattern-info summary { cursor: pointer; font-weight: 600; color: #495057; }
+.pattern-details { margin-top: 1rem; display: grid; gap: 0.5rem; }
+.pattern-item { display: flex; gap: 0.5rem; align-items: center; }
+.pattern-item code { background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; font-family: 'Courier New', monospace; }
+.legend-color.excluded-position { background: repeating-linear-gradient(45deg, #dc3545, #dc3545 2px, #ffffff 2px, #ffffff 4px); }
+.grid-container-candu { border: 2px solid #28a745; }
+.grid-container-agr { border: 2px solid #007bff; }
+.grid-container-unknown { border: 2px solid #6c757d; }
+</style>
+
+{% endblock %}
